@@ -1,0 +1,8 @@
+name: cc.jkob.bedwars
+main: cc.jkob.bedwars.BedWarsPlugin
+version: 1.0
+
+commands:
+  bw:
+    description: Yo
+    usage: /<command> help
