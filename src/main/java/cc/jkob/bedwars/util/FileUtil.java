@@ -6,8 +6,6 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -16,11 +14,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class FileUtil {
-    private static final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .serializeNulls()
-            .registerTypeAdapter(Location.class, new LocationAdapter())
-            .create();
+    private static final Gson gson = buildGson();
 
     public static List<Game> loadGames() {
         ArrayList<Game> games = new ArrayList<>();
@@ -65,5 +59,13 @@ public class FileUtil {
             BedWarsPlugin.getInstance().getLogger().log(Level.INFO, e.getMessage());
             return false;
         }
+    }
+
+    private static Gson buildGson() {
+        return new GsonBuilder()
+            .setPrettyPrinting()
+            .serializeNulls()
+            .registerTypeAdapter(Location.class, new LocationAdapter())
+            .create();
     }
 }

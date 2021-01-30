@@ -1,23 +1,30 @@
 package cc.jkob.bedwars.game;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 
 public enum GeneratorType {
-    IRON(1200, ChatColor.GRAY),
-    GOLD(4200, ChatColor.GOLD),
-    DIAMOND(30000, ChatColor.AQUA),
-    EMERALD(55000, ChatColor.GREEN);
+    IRON(24, ChatColor.GRAY, Material.IRON_INGOT),
+    GOLD(84, ChatColor.GOLD, Material.GOLD_INGOT),
+    DIAMOND(600, ChatColor.AQUA, Material.DIAMOND),
+    EMERALD(1100, ChatColor.GREEN, Material.EMERALD);
 
     private final int interval;
     private final ChatColor chatColor;
+    private final Material material;
 
-    GeneratorType(int interval, ChatColor chatColor) {
+    GeneratorType(int interval, ChatColor chatColor, Material material) {
         this.interval = interval;
         this.chatColor = chatColor;
+        this.material = material;
     }
 
     public int getInterval() {
         return interval;
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 
     @Override

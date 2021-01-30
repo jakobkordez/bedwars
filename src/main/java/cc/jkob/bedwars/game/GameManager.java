@@ -5,6 +5,8 @@ import cc.jkob.bedwars.util.FileUtil;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.bukkit.Location;
+
 public class GameManager {
     private final HashMap<String, Game> games = new HashMap<>();
 
@@ -26,11 +28,21 @@ public class GameManager {
     }
 
     public Game getGameByWorld(String world) {
+        if (world == null) return null;
+
         for (Game game : getGames())
             if (game.getWorld().equals(world))
                 return game;
 
         return null;
+    }
+
+    public Game getGameByLocation(Location location) {
+        return getGameByWorld(location.getWorld().getName());
+    }
+
+    public boolean isLocationInGame(Location location) {
+        return getGameByLocation(location) != null;
     }
 
     public boolean hasGame(String name) {

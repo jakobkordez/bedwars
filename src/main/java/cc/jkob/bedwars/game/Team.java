@@ -1,12 +1,11 @@
 package cc.jkob.bedwars.game;
 
+import java.util.List;
+
 import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class Team implements ConfigurationSerializable {
+public class Team {
     private String name;
     private TeamColor color;
     private Generator ironGen, goldGen;
@@ -60,16 +59,6 @@ public class Team implements ConfigurationSerializable {
         return bedFeet.equals(p) || bedHead.equals(p);
     }
 
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", name);
-        data.put("color", color);
-        data.put("ironGen", ironGen);
-        data.put("goldGen", goldGen);
-        data.put("spawn", spawn);
-        data.put("bedFeet", bedFeet);
-        data.put("bedHead", bedHead);
-        return data;
-    }
+    // transient    
+    private transient List<Player> players;
 }

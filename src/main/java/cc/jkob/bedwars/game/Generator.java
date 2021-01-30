@@ -1,20 +1,19 @@
 package cc.jkob.bedwars.game;
 
 import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.Map;
+import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.task.GeneratorDropTask;
 
-public class Generator implements ConfigurationSerializable {
+public class Generator {
     private Location pos;
     private GeneratorType type;
-    private int interval;
-
+    
     public Generator(Location pos, GeneratorType type) {
-        this.pos = pos.getBlock().getLocation();
+        this.pos = pos;
         this.type = type;
-        this.interval = type.getInterval();
     }
 
     public Location getPos() {
@@ -29,12 +28,29 @@ public class Generator implements ConfigurationSerializable {
         return interval;
     }
 
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("pos", pos);
-        data.put("type", type);
-        data.put("interval", interval);
-        return data;
+    // transient
+    private transient BukkitRunnable dropRunnable;
+    private transient BukkitTask dropTask;
+    private transient int interval;
+
+    public void start() {
+        interval = type.getInterval();
+
+        dropRunnable = new GeneratorDropTask(this);
+        dropTask = dropRunnable.runTaskTimer(BedWarsPlugin.getInstance(), interval, interval);
+    }
+
+    public void upgrade() {
+        dropTask.cancel();
+
+        interval -= 10;
+        dropTask = dropRunnable.runTaskTimer(BedWarsPlugin.getInstance(), interval, interval);
+    }
+
+    public void stop() {
+        dropTask.cancel();
+
+        dropTask = null;
+        dropRunnable = null;
     }
 }

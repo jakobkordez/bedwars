@@ -1,7 +1,6 @@
 package cc.jkob.bedwars.listener;
 
 import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.game.GameManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,12 +34,6 @@ public final class BlockListener implements Listener {
     }
 
     // Cancel all other block events in games
-    @EventHandler(ignoreCancelled = true)
-    public void onBlockGrow(BlockGrowEvent event) {
-        if (isEventInGame(event))
-            event.setCancelled(true);
-    }
-
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBurn(BlockBurnEvent event) {
         if (isEventInGame(event))
@@ -66,16 +59,18 @@ public final class BlockListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onBlockGrow(BlockGrowEvent event) {
+        if (isEventInGame(event))
+            event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onStructureGrow(StructureGrowEvent event) {
-        GameManager manager = plugin.getGameManager();
-        String world = event.getLocation().getWorld().getName();
-        if (manager.getGameByWorld(world) != null)
+        if (plugin.getGameManager().isLocationInGame(event.getLocation()))
             event.setCancelled(true);
     }
 
     private boolean isEventInGame(BlockEvent event) {
-        GameManager manager = plugin.getGameManager();
-        String world = event.getBlock().getWorld().getName();
-        return manager.getGameByWorld(world) != null;
+        return plugin.getGameManager().isLocationInGame(event.getBlock().getLocation());
     }
 }

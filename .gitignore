@@ -6,6 +6,9 @@
 # netbeans
 /nbproject
 
+# VS code
+.vscode/
+
 # we use maven!
 /build.xml
 

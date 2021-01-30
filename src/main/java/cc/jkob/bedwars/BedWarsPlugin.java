@@ -2,6 +2,8 @@ package cc.jkob.bedwars;
 
 import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.listener.BlockListener;
+import cc.jkob.bedwars.listener.PlayerListener;
+import cc.jkob.bedwars.listener.WorldListener;
 import cc.jkob.bedwars.util.BedWarsCommandExecutor;
 import multiworld.MultiWorldPlugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,6 +24,8 @@ public class BedWarsPlugin extends JavaPlugin {
         gameManager = new GameManager();
 
         new BlockListener(this);
+        new PlayerListener(this);
+        new WorldListener(this);
 
         getCommand("bw").setExecutor(new BedWarsCommandExecutor(this));
     }
