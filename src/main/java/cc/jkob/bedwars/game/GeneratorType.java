@@ -4,27 +4,37 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 public enum GeneratorType {
-    IRON(24, ChatColor.GRAY, Material.IRON_INGOT),
-    GOLD(84, ChatColor.GOLD, Material.GOLD_INGOT),
-    DIAMOND(600, ChatColor.AQUA, Material.DIAMOND),
-    EMERALD(1100, ChatColor.GREEN, Material.EMERALD);
+    IRON(24, 64, ChatColor.GRAY, Material.IRON_INGOT, Material.IRON_BLOCK),
+    GOLD(84, 16, ChatColor.GOLD, Material.GOLD_INGOT, Material.GOLD_BLOCK),
+    DIAMOND(600, 4, ChatColor.AQUA, Material.DIAMOND, Material.DIAMOND_BLOCK),
+    EMERALD(1100, 2, ChatColor.GREEN, Material.EMERALD, Material.EMERALD_BLOCK);
 
-    private final int interval;
+    private final int interval, maxStack;
     private final ChatColor chatColor;
-    private final Material material;
+    private final Material item, block;
 
-    GeneratorType(int interval, ChatColor chatColor, Material material) {
+    GeneratorType(int interval, int maxStack, ChatColor chatColor, Material item, Material block) {
         this.interval = interval;
+        this.maxStack = maxStack;
         this.chatColor = chatColor;
-        this.material = material;
+        this.item = item;
+        this.block = block;
     }
 
     public int getInterval() {
         return interval;
     }
 
-    public Material getMaterial() {
-        return material;
+    public int getMaxStack() {
+        return maxStack;
+    }
+
+    public Material getItem() {
+        return item;
+    }
+
+    public Material getBlock() {
+        return block;
     }
 
     @Override

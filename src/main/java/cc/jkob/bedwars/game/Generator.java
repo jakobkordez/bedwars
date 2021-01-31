@@ -8,8 +8,8 @@ import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.task.GeneratorDropTask;
 
 public class Generator {
-    private Location pos;
-    private GeneratorType type;
+    protected Location pos;
+    protected GeneratorType type;
     
     public Generator(Location pos, GeneratorType type) {
         this.pos = pos;
@@ -29,11 +29,15 @@ public class Generator {
     }
 
     // transient
-    private transient BukkitRunnable dropRunnable;
-    private transient BukkitTask dropTask;
-    private transient int interval;
+    protected transient BukkitRunnable dropRunnable;
+    protected transient BukkitTask dropTask;
+    protected transient int interval;
+    protected transient boolean running;
 
     public void start() {
+        if (running) return;
+        running = true;
+
         interval = type.getInterval();
 
         dropRunnable = new GeneratorDropTask(this);
@@ -48,6 +52,9 @@ public class Generator {
     }
 
     public void stop() {
+        if (!running) return;
+        running = false;
+
         dropTask.cancel();
 
         dropTask = null;

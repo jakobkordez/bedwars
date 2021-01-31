@@ -1,5 +1,6 @@
 package cc.jkob.bedwars.game;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -61,4 +62,12 @@ public class Team {
 
     // transient    
     private transient List<Player> players;
+
+    public void init() {
+        players = new ArrayList<>();
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
 }

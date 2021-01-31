@@ -6,13 +6,16 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 public class GameManager {
     private final HashMap<String, Game> games = new HashMap<>();
 
     public GameManager() {
-        for (Game game : FileUtil.loadGames())
+        for (Game game : FileUtil.loadGames()) {
+            game.initTransient();
             games.put(game.getName(), game);
+        }
     }
 
     public Collection<Game> getGames() {
@@ -43,6 +46,18 @@ public class GameManager {
 
     public boolean isLocationInGame(Location location) {
         return getGameByLocation(location) != null;
+    }
+
+    public Game getGameByPlayer(Player player) {
+        for (Game game : games.values())
+            if (game.isPlayerInGame(player))
+                return game;
+
+        return null;
+    }
+
+    public boolean isPlayerInGame(Player player) {
+        return getGameByPlayer(player) != null;
     }
 
     public boolean hasGame(String name) {

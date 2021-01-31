@@ -1,8 +1,8 @@
 package cc.jkob.bedwars.command;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.CommonGenerator;
 import cc.jkob.bedwars.game.Game;
-import cc.jkob.bedwars.game.Generator;
 import cc.jkob.bedwars.game.GeneratorType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -37,10 +37,9 @@ public class AddGenCommand extends AdminCommand {
             throw new CommandException("Invalid generator type");
         }
 
-        Location loc = player.getLocation().getBlock().getLocation().clone().add(.5, 1, .5);
-        loc.setPitch(90);
+        Location loc = player.getLocation().getBlock().getLocation().clone().add(.5, 0, .5);
 
-        game.getGenerators().add(new Generator(loc, genType));
+        game.getGenerators().add(new CommonGenerator(loc, genType));
 
         player.sendMessage(ChatColor.BOLD + genType.toString() + ChatColor.RESET + ChatColor.GREEN + " generator added");
         return true;
