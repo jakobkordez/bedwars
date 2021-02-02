@@ -27,7 +27,7 @@ public class SetSpawnCommand extends AdminCommand {
         Team team = findTeam(args.get(0), args.get(1));
         team.setSpawn(player.getLocation());
 
-        player.sendMessage(ChatColor.BOLD + team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " spawn set");
+        player.sendMessage(team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " spawn set");
         return true;
     }
 }

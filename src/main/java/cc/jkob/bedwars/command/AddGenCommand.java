@@ -41,7 +41,7 @@ public class AddGenCommand extends AdminCommand {
 
         game.getGenerators().add(new CommonGenerator(loc, genType));
 
-        player.sendMessage(ChatColor.BOLD + genType.toString() + ChatColor.RESET + ChatColor.GREEN + " generator added");
+        player.sendMessage(genType.toString() + ChatColor.RESET + ChatColor.GREEN + " generator added");
         return true;
     }
 }

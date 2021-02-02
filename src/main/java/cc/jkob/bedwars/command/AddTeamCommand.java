@@ -46,7 +46,7 @@ public class AddTeamCommand extends AdminCommand {
         Team team = new Team(args.get(1), col);
         game.getTeams().put(args.get(1), team);
 
-        player.sendMessage(ChatColor.GREEN + "Team " + ChatColor.BOLD + team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " created");
+        player.sendMessage(ChatColor.GREEN + "Team " + team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " created");
         return true;
     }
 }

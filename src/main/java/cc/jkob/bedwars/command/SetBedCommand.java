@@ -50,7 +50,7 @@ public class SetBedCommand extends AdminCommand {
 
         team.setBed(bHead, bFeet);
 
-        player.sendMessage(ChatColor.BOLD + team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " bed set");
+        player.sendMessage(team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " bed set");
         return true;
     }
 }
