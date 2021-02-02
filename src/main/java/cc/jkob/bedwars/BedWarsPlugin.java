@@ -4,8 +4,13 @@ import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.listener.BlockListener;
 import cc.jkob.bedwars.listener.PlayerListener;
 import cc.jkob.bedwars.listener.WorldListener;
+import cc.jkob.bedwars.shop.ItemShop;
+import cc.jkob.bedwars.shop.Shop;
+import cc.jkob.bedwars.shop.ShopCategory;
+import cc.jkob.bedwars.shop.ShopItem;
 import cc.jkob.bedwars.util.BedWarsCommandExecutor;
-import multiworld.MultiWorldPlugin;
+
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BedWarsPlugin extends JavaPlugin {
@@ -14,8 +19,6 @@ public class BedWarsPlugin extends JavaPlugin {
         return instance;
     }
 
-    private MultiWorldPlugin multiWorld;
-
     private GameManager gameManager;
 
     @Override
@@ -23,21 +26,21 @@ public class BedWarsPlugin extends JavaPlugin {
         instance = this;
         gameManager = new GameManager();
 
+        ConfigurationSerialization.registerClass(ShopItem.class);
+        ConfigurationSerialization.registerClass(ShopCategory.class);
+        ConfigurationSerialization.registerClass(ItemShop.class);
+
         new BlockListener(this);
         new PlayerListener(this);
         new WorldListener(this);
+
+        Shop.getItemShop();
 
         getCommand("bw").setExecutor(new BedWarsCommandExecutor(this));
     }
 
     @Override
     public void onDisable() {
-    }
-
-    public MultiWorldPlugin getMultiWorld() {
-        if (multiWorld != null) return multiWorld;
-
-        return multiWorld = MultiWorldPlugin.getInstance();
     }
 
     public GameManager getGameManager() {

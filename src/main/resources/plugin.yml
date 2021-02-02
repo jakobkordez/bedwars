@@ -2,6 +2,8 @@ name: cc.jkob.bedwars
 main: cc.jkob.bedwars.BedWarsPlugin
 version: 1.0
 
+depend: [ProtocolLib]
+
 commands:
   bw:
     description: Yo

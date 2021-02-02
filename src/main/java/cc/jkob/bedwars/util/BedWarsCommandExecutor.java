@@ -26,6 +26,7 @@ public class BedWarsCommandExecutor implements CommandExecutor {
         addSubCommand(new StartGameCommand(plugin));
         addSubCommand(new StopGameCommand(plugin));
         addSubCommand(new JoinGameCommand(plugin));
+        addSubCommand(new AddShopCommand(plugin));
 
         // Team
         addSubCommand(new AddTeamCommand(plugin));

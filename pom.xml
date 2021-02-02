@@ -31,6 +31,11 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
+        
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -48,6 +53,12 @@
             <version>2.4.0</version>
             <scope>provided</scope>
         </dependency>
+
+		<dependency>
+			<groupId>com.github.dmulloy2</groupId>
+			<artifactId>ProtocolLib</artifactId>
+			<version>4.5.1</version>
+		</dependency>
 
         <dependency>
             <groupId>multiworld</groupId>

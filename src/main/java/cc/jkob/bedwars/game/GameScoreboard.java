@@ -47,7 +47,8 @@ public class GameScoreboard {
 
     private enum Symbols {
         CHECK("✓", ChatColor.GREEN),
-        CROSS("✗", ChatColor.RED);
+        CROSS("✗", ChatColor.RED),
+        HEART("♥", ChatColor.RED);
 
         private final String string;
 

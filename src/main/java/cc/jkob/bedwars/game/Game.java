@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.SortByPlayers;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class Game {
     private String name, world;
     private HashMap<String, Team> teams = new HashMap<>();
     private List<CommonGenerator> generators = new ArrayList<>();
+    private List<Shopkeeper> shopkeepers = new ArrayList<>();
     private Location lobby;
     private Type gameType = Type.FOURS;
 
@@ -42,6 +44,10 @@ public class Game {
 
     public List<CommonGenerator> getGenerators() {
         return generators;
+    }
+
+    public List<Shopkeeper> getShopkeepers() {
+        return shopkeepers;
     }
 
     public Location getLobby() {
@@ -96,19 +102,19 @@ public class Game {
         scoreboard = new GameScoreboard(this);
         scoreboard.setObjective();
 
-        for (Player player : players)
-            player.setScoreboard(scoreboard.getBoard());
-        for (Player player : spectators)
-            player.setScoreboard(scoreboard.getBoard());
+        players.forEach(p -> scoreboard.getBoard());
+        spectators.forEach(p -> scoreboard.getBoard());
 
         // Start generators
-        for (Generator gen : generators)
-            gen.start();
+        generators.forEach(Generator::start);
         for (Team team : teams.values())
             if (team.getPlayers().size() != 0) {
                 team.getIronGen().start();
                 team.getGoldGen().start();
             }
+        
+        // Spawn shopkeepers
+        shopkeepers.forEach(Shopkeeper::spwan);
     }
 
     public void stop() {
@@ -117,19 +123,19 @@ public class Game {
         state = State.STOPPED;
 
         // Remove scoreboard
-        for (Player player : players)
-            player.setScoreboard(GameScoreboard.EMPTY);
-        for (Player player : spectators)
-            player.setScoreboard(GameScoreboard.EMPTY);
         scoreboard = null;
+        players.forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
+        spectators.forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
 
         // Stop generators
-        for (Generator gen : generators)
-            gen.stop();
+        generators.forEach(Generator::stop);
         for (Team team : teams.values()) {
             team.getIronGen().stop();
             team.getGoldGen().stop();
         }
+
+        // Remove shopkeepers
+        shopkeepers.forEach(Shopkeeper::remove);
 
         players = spectators = null;
     }

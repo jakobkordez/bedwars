@@ -1,0 +1,368 @@
+item_shop:
+  ==: cc.jkob.bedwars.shop.ItemShop
+  categories:
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Blocks
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: STAINED_CLAY
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: WOOL
+        amount: 16
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 4
+      name: Wool
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: CLAY
+        amount: 16
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 12
+      name: Clay
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: GLASS
+        amount: 4
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 12
+      name: Glass
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: END_STONE
+        amount: 12
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 24
+      name: End Stone
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: LADDER
+        amount: 16
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 4
+      name: Ladder
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: OAK_PLANKS
+        amount: 16
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 4
+      name: Wood
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: OBSIDIAN
+        amount: 4
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 4
+      name: Obsidian
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Swords
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: GOLDEN_SWORD
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: STONE_SWORD
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 10
+      name: Stone Sword
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_SWORD
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 7
+      name: Iron Sword
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: DIAMOND_SWORD
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 3
+      name: Diamond Sword
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item:
+        ==: org.bukkit.inventory.ItemStack
+        type: STICK
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 5
+      name: Knockback Stick
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Armor
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: CHAINMAIL_BOOTS
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: CHAINMAIL_BOOTS
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 40
+      name: Chainmail Armor
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_BOOTS
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 12
+      name: Iron Armor
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: DIAMOND_BOOTS
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 6
+      name: Diamond Armor
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Tools
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: STONE_PICKAXE
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: SHEARS
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 20
+      name: Shears
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: WOODEN_PICKAXE
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 10
+      name: Wooden Pickaxe
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: WOODEN_AXE
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 10
+      name: Wooden Axe
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Ranged Weapons
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: BOW
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: ARROW
+        amount: 8
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 2
+      name: Arrows
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: BOW
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 12
+      name: Bow
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: BOW
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 24
+      name: Bow (Power I)
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: BOW
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 6
+      name: Bow (Power I + Punch I)
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Potions
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: BREWING_STAND
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: POTION
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 1
+      name: Jump Potion
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: POTION
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 1
+      name: Speed Potion
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: POTION
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 2
+      name: Invisibility Potion
+  - ==: cc.jkob.bedwars.shop.ShopCategory
+    name: Utilities
+    icon:
+      ==: org.bukkit.inventory.ItemStack
+      type: TNT
+    items:
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLDEN_APPLE
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 3
+      name: Golden Apple
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: SNOWBALL
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 40
+      name: Bedbug
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: GHAST_SPAWN_EGG
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 120
+      name: Dream Defender
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: FIREBALL
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 40
+      name: GayBall
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: TNT
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 8
+      name: TNT
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: ENDER_PEARL
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 4
+      name: Ender Pearl
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: WATER_BUCKET
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 6
+      name: Water Bucket
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: EGG
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: EMERALD
+        amount: 1
+      name: Bridge Egg
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: MILK_BUCKET
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 4
+      name: Magic Milk
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: SPONGE
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: GOLD_INGOT
+        amount: 6
+      name: Sponge
+    - ==: cc.jkob.bedwars.shop.ShopItem
+      item: 
+        ==: org.bukkit.inventory.ItemStack
+        type: CHEST
+      price:
+        ==: org.bukkit.inventory.ItemStack
+        type: IRON_INGOT
+        amount: 24
+      name: Pop-Up Tower

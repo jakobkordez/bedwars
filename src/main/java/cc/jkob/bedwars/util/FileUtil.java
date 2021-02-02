@@ -2,10 +2,14 @@ package cc.jkob.bedwars.util;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
+import cc.jkob.bedwars.shop.Shop;
+
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -14,17 +18,21 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class FileUtil {
+    public static final String SHOP_FILE = "shop.yml";
+
     private static final Gson gson = buildGson();
 
     public static List<Game> loadGames() {
         ArrayList<Game> games = new ArrayList<>();
 
         File files = new File(BedWarsPlugin.getInstance().getDataFolder(), "games");
-        if (files.mkdirs()) return games;
+        if (files.mkdirs())
+            return games;
 
         for (File file : files.listFiles()) {
             String data = readFile(file.getPath());
-            if (data == null) continue;
+            if (data == null)
+                continue;
             Game game = gson.fromJson(data, Game.class);
             games.add(game);
         }
@@ -34,6 +42,35 @@ public class FileUtil {
 
     public static boolean saveGame(Game game) {
         return saveFile("games/" + game.getName() + ".json", gson.toJson(game));
+    }
+
+    public static FileConfiguration getShopConfig() {
+        YamlConfiguration config = YamlConfiguration
+                .loadConfiguration(new File(BedWarsPlugin.getInstance().getDataFolder(), SHOP_FILE));
+
+        if (config == null) {
+            config = YamlConfiguration.loadConfiguration(new InputStreamReader(BedWarsPlugin.getInstance().getResource(SHOP_FILE)));
+            try {
+                config.save(SHOP_FILE);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return config;
+    }
+
+    public static void saveShops() {
+        YamlConfiguration config = new YamlConfiguration();
+
+        config.set("item_shop", Shop.getItemShop());
+        // config.set("upgrade_shop", Shop.getUpgradeShop());
+
+        try {
+            config.save(new File(BedWarsPlugin.getInstance().getDataFolder(), SHOP_FILE));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static String readFile(String path) {
