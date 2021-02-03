@@ -39,10 +39,19 @@ public class GameScoreboard {
         ob.getScore("  ").setScore(i--);
 
         for (Team team : game.getTeams().values())
-            ob.getScore(team.getColor().getPrefix() + " " + team.getName() + ": " + Symbols.CHECK).setScore(i--);
+            ob.getScore(team.getColor().getPrefix() + " " + team.getName() + ": " + getTeamStatus(team)).setScore(i--);
         
         ob.getScore("   ").setScore(i--);
         ob.getScore(ChatColor.YELLOW + "jkob.cc").setScore(i--);
+    }
+
+    private String getTeamStatus(Team team) {
+        if (team.hasBed()) return Symbols.CHECK.toString();
+        
+        int n = team.playersAlive();
+        if (n == 0) return Symbols.CROSS.toString();
+
+        return ChatColor.GREEN.toString() + ChatColor.BOLD + n;
     }
 
     private enum Symbols {

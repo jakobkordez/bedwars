@@ -18,16 +18,6 @@ import org.bukkit.entity.Player;
 import cc.jkob.bedwars.BedWarsPlugin;
 
 public class PacketUtil {
-    public static boolean sendPacket(Player player, PacketContainer packet) {
-        try {
-            getManager().sendServerPacket(player, packet);
-            return true;
-        } catch (InvocationTargetException e) {
-            BedWarsPlugin.getInstance().getLogger().log(Level.WARNING, "Could not send packet", e);
-            return false;
-        }
-    }
-    
     // Packets //
     @SuppressWarnings("deprecation")
     public static PacketContainer createSpawnPacket(int id, Location loc, EntityType type) {
@@ -67,11 +57,22 @@ public class PacketUtil {
         return _protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
+    // Helpers //
     private static WrappedDataWatcher getDefaulWatcher(World world, EntityType type) {
         Entity entity = world.spawnEntity(new Location(world, 0, 256, 0), type);
         WrappedDataWatcher dataWatcher = WrappedDataWatcher.getEntityWatcher(entity).deepClone();
 
         entity.remove();
         return dataWatcher;
+    }
+
+    public static boolean sendPacket(Player player, PacketContainer packet) {
+        try {
+            getManager().sendServerPacket(player, packet);
+            return true;
+        } catch (InvocationTargetException e) {
+            BedWarsPlugin.getInstance().getLogger().log(Level.WARNING, "Could not send packet", e);
+            return false;
+        }
     }
 }

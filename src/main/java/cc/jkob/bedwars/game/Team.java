@@ -1,10 +1,11 @@
 package cc.jkob.bedwars.game;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.bukkit.Material;
 
 public class Team {
     private String name;
@@ -60,14 +61,43 @@ public class Team {
         return bedFeet.equals(p) || bedHead.equals(p);
     }
 
-    // transient    
-    private transient List<Player> players;
+    // transient
+    private transient Game game;
+    private transient Set<UUID> players;
+    private transient boolean bedAlive;
 
-    public void init() {
-        players = new ArrayList<>();
+    public void init(Game game) {
+        this.game = game;
+        players = new HashSet<>();
+        bedAlive = true;
     }
 
-    public List<Player> getPlayers() {
+    public void startGens() {
+        ironGen.start();
+        goldGen.start();
+    }
+
+    public void stopGens() {
+        ironGen.stop();
+        goldGen.stop();
+    }
+
+    public void destroyBed() {
+        bedFeet.getBlock().setType(Material.AIR);
+        bedAlive = false;
+    }
+
+    public boolean hasBed() {
+        return bedAlive;
+    }
+
+    public int playersAlive() {
+        Set<UUID> res = new HashSet<>(players);
+        res.retainAll(game.getPlayers());
+        return res.size();
+    }
+
+    public Set<UUID> getPlayers() {
         return players;
     }
 }

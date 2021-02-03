@@ -1,17 +1,25 @@
 package cc.jkob.bedwars.game;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
+import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.shop.Shopkeeper;
+import cc.jkob.bedwars.task.ScoreboardUpdateTask;
 import cc.jkob.bedwars.util.SortByPlayers;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public class Game {
     private String name, world;
@@ -60,8 +68,9 @@ public class Game {
 
     // transient
     private transient State state;
-    private transient List<Player> players, spectators;
+    private transient Set<UUID> players, spectators;
     private transient GameScoreboard scoreboard;
+    private transient BukkitTask scoreboardTask;
 
     public void initTransient() {
         state = State.STOPPED;
@@ -71,20 +80,23 @@ public class Game {
         return state;
     }
 
+    public Set<UUID> getPlayers() {
+        return players;
+    }
+
     public void init() {
         if (state != State.STOPPED) return;
 
         state = State.WAITING;
 
-        for (Team team : teams.values())
-            team.init();
+        teams.forEach((k, t) -> t.init(this));
         
         for (Entity entity : lobby.getWorld().getEntities())
             if (!(entity instanceof Player))
                 entity.remove();
         
-        players = new ArrayList<>();
-        spectators = new ArrayList<>();
+        players = new HashSet<>();
+        spectators = new HashSet<>();
     }
 
     public void start() {
@@ -95,26 +107,26 @@ public class Game {
         autoAssignTeams();
 
         players.clear();
-        for (Team team : teams.values())
-            players.addAll(team.getPlayers());
+        teams.forEach((k, t) -> players.addAll(t.getPlayers()));
 
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
-        scoreboard.setObjective();
-
-        players.forEach(p -> scoreboard.getBoard());
-        spectators.forEach(p -> scoreboard.getBoard());
+        scoreboardTask = new ScoreboardUpdateTask(scoreboard).runTaskTimer(BedWarsPlugin.getInstance(), 0, 20);
+        getPlayerStream(true).forEach(p -> p.setScoreboard(scoreboard.getBoard()));
 
         // Start generators
         generators.forEach(Generator::start);
         for (Team team : teams.values())
-            if (team.getPlayers().size() != 0) {
-                team.getIronGen().start();
-                team.getGoldGen().start();
-            }
+            if (team.getPlayers().size() != 0)
+                team.startGens();
         
         // Spawn shopkeepers
-        shopkeepers.forEach(Shopkeeper::spwan);
+        shopkeepers.forEach(Shopkeeper::spawn);
+
+        // Destroy beds without players
+        for (Team team : teams.values())
+            if (team.getPlayers().size() == 0)
+                team.destroyBed();
     }
 
     public void stop() {
@@ -124,15 +136,13 @@ public class Game {
 
         // Remove scoreboard
         scoreboard = null;
-        players.forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
-        spectators.forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
+        scoreboardTask.cancel();
+        getPlayerStream(true).forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
 
         // Stop generators
         generators.forEach(Generator::stop);
-        for (Team team : teams.values()) {
-            team.getIronGen().stop();
-            team.getGoldGen().stop();
-        }
+        for (Team team : teams.values())
+            team.stopGens();
 
         // Remove shopkeepers
         shopkeepers.forEach(Shopkeeper::remove);
@@ -150,7 +160,7 @@ public class Game {
             if (teamIt.hasNext()) cTeam = teamIt.next();
             else break;
 
-        for (Player player : players)
+        for (UUID player : players)
             if (cTeam.getPlayers().size() < gameType.getPlayers())
                 cTeam.getPlayers().add(player);
             else if (teamIt.hasNext())
@@ -165,11 +175,11 @@ public class Game {
         switch (state) {
             
             case WAITING:
-                players.add(player);
+                players.add(player.getUniqueId());
                 return true;
 
             case RUNNING:
-                spectators.add(player);
+                spectators.add(player.getUniqueId());
                 return true;
             
             default:
@@ -178,24 +188,35 @@ public class Game {
     }
 
     public boolean isPlayerInGame(Player player) {
+        UUID pUuid = player.getUniqueId();
+
         switch (state) {
 
             case WAITING:
-                if (players.contains(player)) return true;
-                if (spectators.contains(player)) return true;
+                if (players.contains(pUuid)) return true;
+                if (spectators.contains(pUuid)) return true;
                 for (Team team : teams.values())
-                    if (team.getPlayers().contains(player))
+                    if (team.getPlayers().contains(pUuid))
                         return true;
                 return false;
 
             case RUNNING:
-                if (players.contains(player)) return true;
-                if (spectators.contains(player)) return true;
+                if (players.contains(pUuid)) return true;
+                if (spectators.contains(pUuid)) return true;
                 return false;
 
             default:
                 return false;
         }
+    }
+
+    private Stream<? extends Player> getPlayerStream(boolean withSpectators) {
+        if (withSpectators)
+            return Bukkit.getServer().getOnlinePlayers().parallelStream()
+                .filter(p -> players.contains(p.getUniqueId()) || spectators.contains(p.getUniqueId()));
+        
+        return Bukkit.getServer().getOnlinePlayers().parallelStream()
+            .filter(p -> players.contains(p.getUniqueId()));
     }
 
     public enum State {

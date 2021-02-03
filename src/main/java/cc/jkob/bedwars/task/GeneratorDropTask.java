@@ -26,12 +26,14 @@ public class GeneratorDropTask extends BukkitRunnable {
         if (drop != null && !drop.isDead()) {
             ItemStack stack = drop.getItemStack();
 
-            int size = stack.getMaxStackSize() + 1;
+            int size = stack.getAmount() + 1;
             if (size > generator.getType().getMaxStack())
                 size = generator.getType().getMaxStack();
 
             stack.setAmount(size);
         } else {
+            if (drop != null) drop.remove();
+
             drop = pos.getWorld().dropItem(pos.clone().add(0, 1, 0), new ItemStack(material));
             drop.setVelocity(new Vector());
         }

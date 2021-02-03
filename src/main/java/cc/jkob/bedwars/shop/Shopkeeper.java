@@ -5,7 +5,6 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 
 import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -14,7 +13,7 @@ import cc.jkob.bedwars.shop.Shop.ShopType;
 import cc.jkob.bedwars.util.PacketUtil;
 
 public class Shopkeeper {
-    private static int entityId = 200;
+    private static int entityId = 60000;
 
     private Location loc;
     private ShopType type;
@@ -27,14 +26,14 @@ public class Shopkeeper {
     // transient
     private transient int eId;
     private transient Hologram hologram;
-    private transient ArmorStand armorStand;
 
-    public void spwan() {
+    public int geteId() {
+        return eId;
+    }
+
+    public void spawn() {
         hologram = HologramsAPI.createHologram(BedWarsPlugin.getInstance(), loc.clone().add(0, 2.5, 0));
         hologram.appendTextLine(type.getName());
-
-        armorStand = loc.getWorld().spawn(loc, ArmorStand.class);
-        armorStand.setVisible(false);
 
         eId = entityId++;
         loc.getWorld().getPlayers().forEach(p -> sendSpawnPacket(p));
@@ -42,7 +41,6 @@ public class Shopkeeper {
 
     public void remove() {
         hologram.delete();
-        armorStand.remove();
 
         loc.getWorld().getPlayers().forEach(p -> sendDestroyPacket(p));
     }
