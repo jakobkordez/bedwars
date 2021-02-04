@@ -163,9 +163,11 @@ public class Game {
         state = State.STOPPED;
 
         // Remove scoreboard
-        scoreboard.stopTask();
-        scoreboard = null;
-        getPlayerStream(true).forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
+        if (scoreboard != null) {
+            scoreboard.stopTask();
+            scoreboard = null;
+            getPlayerStream(true).forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
+        }
 
         // Stop generators
         generators.forEach(Generator::stop);

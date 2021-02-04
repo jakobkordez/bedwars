@@ -43,6 +43,7 @@ public class Shopkeeper {
         hologram.delete();
 
         loc.getWorld().getPlayers().forEach(p -> sendDestroyPacket(p));
+        spawnPacket = destroyPacket = null;
     }
 
     // Packets //
