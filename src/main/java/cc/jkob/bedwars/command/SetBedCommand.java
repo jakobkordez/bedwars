@@ -2,11 +2,12 @@ package cc.jkob.bedwars.command;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Team;
+import cc.jkob.bedwars.util.BlockUtil;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandException;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Bed;
@@ -38,15 +39,12 @@ public class SetBedCommand extends AdminCommand {
 
         if (b.getType() != Material.BED_BLOCK) throw new CommandException("You must stand on a bed");
 
-        // TODO: BlockUtil
-        Bed bed = (Bed) b.getState().getData();
-        BlockFace facing = bed.getFacing();
-        if (bed.isHeadOfBed()) {
+        if (((Bed) b.getState().getData()).isHeadOfBed()) {
             bHead = p;
-            bFeet = p.clone().add(-facing.getModX(), facing.getModY(), -facing.getModZ());
+            bFeet = BlockUtil.getOtherBedBlock(b).getLocation();
         } else {
             bFeet = p;
-            bHead = p.clone().add(facing.getModX(), facing.getModY(), facing.getModZ());
+            bHead = BlockUtil.getOtherBedBlock(b).getLocation();
         }
 
         team.setBed(bHead, bFeet);

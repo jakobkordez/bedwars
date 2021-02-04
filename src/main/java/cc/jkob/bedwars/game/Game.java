@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class Game {
     private String name, world;
-    private HashMap<String, Team> teams = new HashMap<>();
+    private HashMap<String, Team> teams = new HashMap<>(); // TODO: List
     private List<CommonGenerator> generators = new ArrayList<>();
     private List<Shopkeeper> shopkeepers = new ArrayList<>();
     private Location lobby;

@@ -24,6 +24,7 @@ public class Shopkeeper {
     }
 
     // transient
+    private transient boolean isSpawned;
     private transient int eId;
     private transient Hologram hologram;
 
@@ -31,19 +32,25 @@ public class Shopkeeper {
         return eId;
     }
 
-    public void spawn() {
+    public boolean spawn() {
+        if (isSpawned) return false;
+
         hologram = HologramsAPI.createHologram(BedWarsPlugin.getInstance(), loc.clone().add(0, 2.5, 0));
         hologram.appendTextLine(type.getName());
 
         eId = entityId++;
         loc.getWorld().getPlayers().forEach(p -> sendSpawnPacket(p));
+        return true;
     }
 
-    public void remove() {
+    public boolean remove() {
+        if (!isSpawned) return false;
+
         hologram.delete();
 
         loc.getWorld().getPlayers().forEach(p -> sendDestroyPacket(p));
         spawnPacket = destroyPacket = null;
+        return true;
     }
 
     // Packets //

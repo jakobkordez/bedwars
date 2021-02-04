@@ -18,7 +18,7 @@ public class GameCycle {
             Stage.generatorUpgrade(game, this, GeneratorType.EMERALD, 7200, "Emerald II"),
             Stage.generatorUpgrade(game, this, GeneratorType.DIAMOND, 7200, "Diamond III"),
             Stage.generatorUpgrade(game, this, GeneratorType.EMERALD, 7200, "Emerald III"),
-            Stage.bedDestruction(game, this, 12000, "Bed Destruction"),
+            Stage.bedDestruction(game, this, 12000, "Bed Gone"),
             Stage.gameTie(game, this, 12000, "Tie")
         ).iterator();
     }

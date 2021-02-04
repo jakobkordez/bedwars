@@ -2,6 +2,7 @@ package cc.jkob.bedwars.util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.Bed;
@@ -26,7 +27,7 @@ public class BlockUtil {
         headS.update(true, true);
     }
 
-    public static BlockFace getBedFacing(Location feet, Location head) {
+    private static BlockFace getBedFacing(Location feet, Location head) {
         int dx = (int) head.getX() - (int) feet.getX();
         int dz = (int) head.getZ() - (int) feet.getZ();
 
@@ -38,5 +39,17 @@ public class BlockUtil {
                 return dz > 0 ? BlockFace.SOUTH : BlockFace.NORTH;
         
         return BlockFace.SELF;
+    }
+
+    public static Block getOtherBedBlock(Block b) {
+        if (b.getType() != Material.BED_BLOCK) return null;
+        
+        Bed bed = (Bed) b.getState().getData();
+        BlockFace facing = bed.getFacing();
+
+        if (bed.isHeadOfBed())
+            return b.getRelative(facing.getOppositeFace());
+        else
+            return b.getRelative(facing);
     }
 }

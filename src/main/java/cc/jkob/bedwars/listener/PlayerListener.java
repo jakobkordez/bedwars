@@ -51,7 +51,7 @@ public class PlayerListener implements Listener {
 
         if (!game.getPlayers().contains(player.getUniqueId())) return;
 
-        // Open shop
+        // TODO: Open shop
         event.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "Opening shop");
     }
 

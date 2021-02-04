@@ -3,6 +3,8 @@ package cc.jkob.bedwars.game;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
+import cc.jkob.bedwars.util.LangUtil;
+
 public enum GeneratorType {
     IRON(30, 64, ChatColor.GRAY, Material.IRON_INGOT, Material.IRON_BLOCK),
     GOLD(90, 16, ChatColor.GOLD, Material.GOLD_INGOT, Material.GOLD_BLOCK),
@@ -38,6 +40,10 @@ public enum GeneratorType {
     }
 
     public String getFormattedName() {
-        return "" + chatColor + super.toString().charAt(0) + super.toString().substring(1).toLowerCase();
+        return getFormattedName(false);
+    }
+
+    public String getFormattedName(boolean bold) {
+        return "" + chatColor + (bold ? ChatColor.BOLD : "") + LangUtil.capitalize(toString());
     }
 }
