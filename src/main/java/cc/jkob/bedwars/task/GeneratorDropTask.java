@@ -4,18 +4,26 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import cc.jkob.bedwars.game.Generator;
 
-public class GeneratorDropTask extends BukkitRunnable {
+public class GeneratorDropTask extends RunnableWithStatus {
 
     private final Generator generator;
     private Item drop;
 
     public GeneratorDropTask(Generator generator) {
         this.generator = generator;
+    }
+
+    public GeneratorDropTask(Generator generator, Item drop) {
+        this.generator = generator;
+        this.drop = drop;
+    }
+
+    public Item getDrop() {
+        return drop;
     }
 
     @Override
@@ -37,5 +45,7 @@ public class GeneratorDropTask extends BukkitRunnable {
             drop = pos.getWorld().dropItem(pos.clone().add(0, 1, 0), new ItemStack(material));
             drop.setVelocity(new Vector());
         }
+
+        super.run();
     }
 }

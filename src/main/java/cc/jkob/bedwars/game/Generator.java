@@ -1,8 +1,6 @@
 package cc.jkob.bedwars.game;
 
 import org.bukkit.Location;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.task.GeneratorDropTask;
@@ -29,10 +27,15 @@ public class Generator {
     }
 
     // transient
-    protected transient BukkitRunnable dropRunnable;
-    protected transient BukkitTask dropTask;
+    protected transient GeneratorDropTask dropTask;
     protected transient int interval;
     protected transient boolean running;
+
+    public long getTicksTillDrop() {
+        if (!running) return -1;
+
+        return dropTask.getRemainingTicks();
+    }
 
     public void start() {
         if (running) return;
@@ -40,15 +43,16 @@ public class Generator {
 
         interval = type.getInterval();
 
-        dropRunnable = new GeneratorDropTask(this);
-        dropTask = dropRunnable.runTaskTimer(BedWarsPlugin.getInstance(), interval, interval);
+        dropTask = new GeneratorDropTask(this);
+        dropTask.runTaskTimer(BedWarsPlugin.getInstance(), interval, interval);
     }
 
     public void upgrade() {
         dropTask.cancel();
 
         interval -= 10;
-        dropTask = dropRunnable.runTaskTimer(BedWarsPlugin.getInstance(), interval, interval);
+        dropTask = new GeneratorDropTask(this, dropTask.getDrop());
+        dropTask.runTaskTimer(BedWarsPlugin.getInstance(), 0, interval);
     }
 
     public void stop() {
@@ -58,6 +62,5 @@ public class Generator {
         dropTask.cancel();
 
         dropTask = null;
-        dropRunnable = null;
     }
 }

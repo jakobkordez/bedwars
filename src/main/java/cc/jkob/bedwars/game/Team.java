@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
+import cc.jkob.bedwars.util.BlockUtil;
+
 public class Team {
     private String name;
     private TeamColor color;
@@ -70,6 +72,9 @@ public class Team {
         this.game = game;
         players = new HashSet<>();
         bedAlive = true;
+
+        if (bedFeet.getBlock().isEmpty() || bedHead.getBlock().isEmpty())
+            BlockUtil.placeBed(bedFeet, bedHead);
     }
 
     public void startGens() {

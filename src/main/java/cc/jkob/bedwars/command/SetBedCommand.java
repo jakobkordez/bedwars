@@ -38,6 +38,7 @@ public class SetBedCommand extends AdminCommand {
 
         if (b.getType() != Material.BED_BLOCK) throw new CommandException("You must stand on a bed");
 
+        // TODO: BlockUtil
         Bed bed = (Bed) b.getState().getData();
         BlockFace facing = bed.getFacing();
         if (bed.isHeadOfBed()) {

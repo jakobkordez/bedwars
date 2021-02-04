@@ -1,14 +1,14 @@
 package cc.jkob.bedwars.game;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.shop.Shopkeeper;
-import cc.jkob.bedwars.task.ScoreboardUpdateTask;
 import cc.jkob.bedwars.util.SortByPlayers;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class Game {
     private transient State state;
     private transient Set<UUID> players, spectators;
     private transient GameScoreboard scoreboard;
-    private transient BukkitTask scoreboardTask;
+    private transient GameCycle gameCycle;
 
     public void initTransient() {
         state = State.STOPPED;
@@ -82,6 +82,10 @@ public class Game {
 
     public Set<UUID> getPlayers() {
         return players;
+    }
+
+    public GameCycle getGameCycle() {
+        return gameCycle;
     }
 
     public void init() {
@@ -111,7 +115,7 @@ public class Game {
 
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
-        scoreboardTask = new ScoreboardUpdateTask(scoreboard).runTaskTimer(BedWarsPlugin.getInstance(), 0, 20);
+        scoreboard.startTask();
         getPlayerStream(true).forEach(p -> p.setScoreboard(scoreboard.getBoard()));
 
         // Start generators
@@ -127,6 +131,30 @@ public class Game {
         for (Team team : teams.values())
             if (team.getPlayers().size() == 0)
                 team.destroyBed();
+        
+        // Start game cycle
+        gameCycle = new GameCycle(this);
+        gameCycle.triggerNext();
+    }
+
+    public void end(Team winner) {
+        if (state != State.RUNNING) return;
+
+        state = State.ENDED;
+
+        String ttitle = "" + ChatColor.GOLD + ChatColor.BOLD + "Tie";
+        String subTitle = "" + ChatColor.RED + ChatColor.BOLD + "Game Over";
+        if (winner != null) ttitle = "" + winner.getColor().getChatColor() + ChatColor.BOLD + " wins!";
+        String title = ttitle;
+
+        // TODO: packets?
+        getPlayerStream(true).forEach(p -> p.sendTitle(title, subTitle));
+
+        new BukkitRunnable(){
+            public void run() {
+                stop();
+            }
+        }.runTaskLater(BedWarsPlugin.getInstance(), 200);
     }
 
     public void stop() {
@@ -135,33 +163,38 @@ public class Game {
         state = State.STOPPED;
 
         // Remove scoreboard
+        scoreboard.stopTask();
         scoreboard = null;
-        scoreboardTask.cancel();
         getPlayerStream(true).forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
 
         // Stop generators
         generators.forEach(Generator::stop);
-        for (Team team : teams.values())
-            team.stopGens();
+        teams.values().forEach(Team::stopGens);
 
         // Remove shopkeepers
         shopkeepers.forEach(Shopkeeper::remove);
+
+        // Stop game cycle
+        gameCycle.stop();
+        gameCycle = null;
 
         players = spectators = null;
     }
 
     private void autoAssignTeams() {
+        int maxPlayers = gameType.getPlayers();
+
         List<Team> fTeams = new ArrayList<>(teams.values());
         Collections.sort(fTeams, new SortByPlayers());
         Iterator<Team> teamIt = fTeams.iterator();
 
         Team cTeam = teamIt.next();
-        while (cTeam.getPlayers().size() >= gameType.getPlayers())
+        while (cTeam.getPlayers().size() >= maxPlayers)
             if (teamIt.hasNext()) cTeam = teamIt.next();
             else break;
 
         for (UUID player : players)
-            if (cTeam.getPlayers().size() < gameType.getPlayers())
+            if (cTeam.getPlayers().size() < maxPlayers)
                 cTeam.getPlayers().add(player);
             else if (teamIt.hasNext())
                 cTeam = teamIt.next();

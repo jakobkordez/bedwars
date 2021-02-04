@@ -1,11 +1,16 @@
 package cc.jkob.bedwars.game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.task.ScoreboardUpdateTask;
 
 public class GameScoreboard {
     private static final int MAX_LINES = 15;
@@ -13,7 +18,8 @@ public class GameScoreboard {
     
     private final Game game;
     private final Scoreboard board;
-    private Objective ob;
+    private Objective sidebar;
+    private ScoreboardUpdateTask updateTask;
 
     public GameScoreboard(Game game) {
         this.game = game;
@@ -25,33 +31,88 @@ public class GameScoreboard {
         return board;
     }
 
-    public void setObjective() {
+    public boolean startTask() {
+        if (updateTask != null) return false;
+
+        updateTask = new ScoreboardUpdateTask(this);
+        updateTask.runTaskTimer(BedWarsPlugin.getInstance(), 0, 10);
+        return true;
+    }
+
+    public boolean stopTask() {
+        if (updateTask == null) return false;
+
+        updateTask.cancel();
+        updateTask = null;
+        return true;
+    }
+
+    private Score stageScore;
+    private Map<TeamColor, Score> teamScores;
+    private void setSidebar() {
         int i = MAX_LINES;
 
-        if (ob != null) ob.unregister();
+        if (sidebar != null) sidebar.unregister();
         
-        ob = board.registerNewObjective("Teams", "dummy");
-        ob.setDisplayName(ChatColor.YELLOW.toString() + ChatColor.BOLD + "   Bed Wars   ");
-        ob.setDisplaySlot(DisplaySlot.SIDEBAR);
+        sidebar = board.registerNewObjective("Teams", "dummy");
+        sidebar.setDisplayName("" + ChatColor.YELLOW + ChatColor.BOLD + "    Bed Wars    ");
+        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        ob.getScore(" ").setScore(i--);
-        ob.getScore("Emerald III in 5:99").setScore(i--);
-        ob.getScore("  ").setScore(i--);
+        sidebar.getScore(" ").setScore(i--);
+        stageScore = sidebar.getScore(getNextStage());
+        stageScore.setScore(i--);
+        sidebar.getScore("  ").setScore(i--);
 
-        for (Team team : game.getTeams().values())
-            ob.getScore(team.getColor().getPrefix() + " " + team.getName() + ": " + getTeamStatus(team)).setScore(i--);
+        teamScores = new HashMap<>();
+        for (Team team : game.getTeams().values()) {
+            Score ts = sidebar.getScore(getTeamStatus(team));
+            teamScores.put(team.getColor(), ts);
+            ts.setScore(i--);
+        }
         
-        ob.getScore("   ").setScore(i--);
-        ob.getScore(ChatColor.YELLOW + "jkob.cc").setScore(i--);
+        sidebar.getScore("   ").setScore(i--);
+        sidebar.getScore(ChatColor.YELLOW + "jkob.cc").setScore(i--);
+    }
+
+    public void updateSidebar() {
+        if (sidebar == null) {
+            setSidebar();
+            return;
+        }
+
+        stageScore = updateScore(stageScore, getNextStage());
+        for (Team team : game.getTeams().values()) {
+            Score ts = teamScores.get(team.getColor());
+            ts = updateScore(ts, getTeamStatus(team));
+            teamScores.put(team.getColor(), ts);
+        }
+    }
+    
+    public Score updateScore(Score score, String entry) {
+        if (score.getEntry() == entry) return score;
+
+        int sc = score.getScore();
+        board.resetScores(score.getEntry());
+        score = sidebar.getScore(entry);
+        score.setScore(sc);
+        return score;
+    }
+
+    private String getNextStage() {
+        GameCycle cycle = game.getGameCycle();
+        long ticks = cycle.getStageRemainingTicks();
+        return cycle.getStageTitle() + " in " + ChatColor.GREEN + String.format("%d:%02d", ticks/1200, (ticks%1200)/20);
     }
 
     private String getTeamStatus(Team team) {
-        if (team.hasBed()) return Symbols.CHECK.toString();
-        
+        String status;
         int n = team.playersAlive();
-        if (n == 0) return Symbols.CROSS.toString();
 
-        return ChatColor.GREEN.toString() + ChatColor.BOLD + n;
+        if (team.hasBed()) status = "" + Symbols.CHECK;
+        else if (n == 0) status = "" + Symbols.CROSS;
+        else status = "" + ChatColor.GREEN + n;
+
+        return team.getColor().getPrefix() + " " + team.getName() + ": " + status;
     }
 
     private enum Symbols {
@@ -62,7 +123,7 @@ public class GameScoreboard {
         private final String string;
 
         private Symbols(String symbol, ChatColor color) {
-            string = color.toString() + ChatColor.BOLD + symbol + ChatColor.RESET;
+            string = "" + color + ChatColor.BOLD + symbol + ChatColor.RESET;
         }
 
         @Override

@@ -17,7 +17,7 @@ public enum TeamColor {
 
     TeamColor(ChatColor chatColor, String prefix) {
         this.chatColor = chatColor;
-        this.prefix = chatColor.toString() + ChatColor.BOLD + prefix + ChatColor.RESET;
+        this.prefix = "" + chatColor + ChatColor.BOLD + prefix + ChatColor.RESET;
     }
 
     public ChatColor getChatColor() {

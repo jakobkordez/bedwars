@@ -13,7 +13,6 @@ public class ScoreboardUpdateTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        scoreboard.setObjective();
+        scoreboard.updateSidebar();
     }
-    
 }

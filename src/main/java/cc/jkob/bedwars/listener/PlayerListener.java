@@ -52,7 +52,7 @@ public class PlayerListener implements Listener {
         if (!game.getPlayers().contains(player.getUniqueId())) return;
 
         // Open shop
-        event.getPlayer().sendMessage(ChatColor.GOLD.toString() + ChatColor.BOLD + "Opening shop");
+        event.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "Opening shop");
     }
 
     private boolean isEventInGame(PlayerEvent event) {

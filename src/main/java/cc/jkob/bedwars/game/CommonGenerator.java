@@ -25,7 +25,7 @@ public class CommonGenerator extends Generator {
 
         hologram = HologramsAPI.createHologram(BedWarsPlugin.getInstance(), pos.clone().add(0, 4, 0));
 
-        hologram.appendTextLine(type.toString() + ChatColor.RESET + " generator");
+        hologram.appendTextLine(type.getFormattedName() + ChatColor.RESET + " generator");
         hologram.appendTextLine("Spawning in...");
         hologram.appendItemLine(new ItemStack(type.getBlock()));
     }

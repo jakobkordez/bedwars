@@ -37,8 +37,7 @@ public enum GeneratorType {
         return block;
     }
 
-    @Override
-    public String toString() {
-        return chatColor.toString() + super.toString().charAt(0) + super.toString().substring(1).toLowerCase();
+    public String getFormattedName() {
+        return "" + chatColor + super.toString().charAt(0) + super.toString().substring(1).toLowerCase();
     }
 }
