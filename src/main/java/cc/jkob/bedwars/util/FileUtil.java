@@ -48,14 +48,13 @@ public class FileUtil {
         YamlConfiguration config = YamlConfiguration
                 .loadConfiguration(new File(BedWarsPlugin.getInstance().getDataFolder(), SHOP_FILE));
 
-        if (config == null) {
-            config = YamlConfiguration.loadConfiguration(new InputStreamReader(BedWarsPlugin.getInstance().getResource(SHOP_FILE)));
-            try {
-                config.save(SHOP_FILE);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(BedWarsPlugin.getInstance().getResource(SHOP_FILE))));
+
+        // try {
+        //     config.save(new File(BedWarsPlugin.getInstance().getDataFolder(), SHOP_FILE));
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
 
         return config;
     }

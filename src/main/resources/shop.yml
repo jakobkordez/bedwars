@@ -5,7 +5,7 @@ item_shop:
     name: Blocks
     icon:
       ==: org.bukkit.inventory.ItemStack
-      type: STAINED_CLAY
+      type: HARD_CLAY
     items:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
@@ -20,13 +20,13 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
         ==: org.bukkit.inventory.ItemStack
-        type: CLAY
+        type: HARD_CLAY
         amount: 16
       price:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
         amount: 12
-      name: Clay
+      name: Hardened Clay
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
         ==: org.bukkit.inventory.ItemStack
@@ -36,11 +36,11 @@ item_shop:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
         amount: 12
-      name: Glass
+      name: Blast-Proof Glass
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
         ==: org.bukkit.inventory.ItemStack
-        type: END_STONE
+        type: ENDER_STONE
         amount: 12
       price:
         ==: org.bukkit.inventory.ItemStack
@@ -60,7 +60,7 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
         ==: org.bukkit.inventory.ItemStack
-        type: OAK_PLANKS
+        type: WOOD
         amount: 16
       price:
         ==: org.bukkit.inventory.ItemStack
@@ -78,10 +78,10 @@ item_shop:
         amount: 4
       name: Obsidian
   - ==: cc.jkob.bedwars.shop.ShopCategory
-    name: Swords
+    name: Melee
     icon:
       ==: org.bukkit.inventory.ItemStack
-      type: GOLDEN_SWORD
+      type: GOLD_SWORD
     items:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item:
@@ -170,7 +170,7 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item: 
         ==: org.bukkit.inventory.ItemStack
-        type: WOODEN_PICKAXE
+        type: WOOD_PICKAXE
       price:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
@@ -179,14 +179,14 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item: 
         ==: org.bukkit.inventory.ItemStack
-        type: WOODEN_AXE
+        type: WOOD_AXE
       price:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
         amount: 10
       name: Wooden Axe
   - ==: cc.jkob.bedwars.shop.ShopCategory
-    name: Ranged Weapons
+    name: Ranged
     icon:
       ==: org.bukkit.inventory.ItemStack
       type: BOW
@@ -232,7 +232,7 @@ item_shop:
     name: Potions
     icon:
       ==: org.bukkit.inventory.ItemStack
-      type: BREWING_STAND
+      type: BREWING_STAND_ITEM
     items:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item: 
@@ -262,7 +262,7 @@ item_shop:
         amount: 2
       name: Invisibility Potion
   - ==: cc.jkob.bedwars.shop.ShopCategory
-    name: Utilities
+    name: Utility
     icon:
       ==: org.bukkit.inventory.ItemStack
       type: TNT
@@ -279,7 +279,7 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item: 
         ==: org.bukkit.inventory.ItemStack
-        type: SNOWBALL
+        type: SNOW_BALL
       price:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT
@@ -288,7 +288,7 @@ item_shop:
     - ==: cc.jkob.bedwars.shop.ShopItem
       item: 
         ==: org.bukkit.inventory.ItemStack
-        type: GHAST_SPAWN_EGG
+        type: MONSTER_EGG 
       price:
         ==: org.bukkit.inventory.ItemStack
         type: IRON_INGOT

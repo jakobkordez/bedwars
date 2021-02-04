@@ -1,8 +1,12 @@
 package cc.jkob.bedwars.shop;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import cc.jkob.bedwars.util.FileUtil;
+import cc.jkob.bedwars.util.LangUtil;
 
 public abstract class Shop {
     private static ItemShop itemShop;
@@ -35,9 +39,43 @@ public abstract class Shop {
         return null;
     }
 
+    public abstract Inventory buildInventory();
+
+    protected static String formatCost(ItemStack cost) {
+        String curr, ret = "";
+        switch (cost.getType()) {
+            case IRON_INGOT:
+                ret += ChatColor.WHITE;
+                curr = "Iron";
+                break;
+            case GOLD_INGOT:
+                ret += ChatColor.GOLD;
+                curr = "Gold";
+                break;
+            case DIAMOND:
+                ret += ChatColor.AQUA;
+                curr = "Diamond";
+                break;
+            case EMERALD:
+                ret += ChatColor.DARK_GREEN;
+                curr = "Emerald";
+                break;
+            default:
+                ret += ChatColor.WHITE;
+                curr = LangUtil.capitalize(cost.getType().toString());
+        }
+        ret += cost.getAmount() + " " + curr;
+
+        if (cost.getAmount() > 1)
+            if (cost.getType() == Material.DIAMOND || cost.getType() == Material.EMERALD)
+                ret += "s";
+
+        return ret;
+    }
+
     public enum ShopType {
-        ITEM(ChatColor.AQUA + "ITEM SHOP"),
-        UPGRADE(ChatColor.AQUA + "UPGRADES");
+        ITEM("Item shop"),
+        UPGRADE("Upgrades");
 
         private final String name;
 
@@ -47,6 +85,10 @@ public abstract class Shop {
 
         public String getName() {
             return name;
+        }
+
+        public String getFormattedName() {
+            return ChatColor.AQUA + name.toUpperCase();
         }
     }
 }
