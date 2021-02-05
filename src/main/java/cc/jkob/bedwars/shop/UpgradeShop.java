@@ -1,12 +1,20 @@
 package cc.jkob.bedwars.shop;
 
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 
 public class UpgradeShop extends Shop {
+    private static final int ROWS = 4;
+
     @Override
-    public Inventory buildInventory() {
+    public void open(Player player) {
         // TODO: Implement
-        return Bukkit.createInventory(null, 9*3, ShopType.UPGRADE.getName());
+        player.openInventory(Bukkit.createInventory(null, 9 * ROWS, ShopType.UPGRADE.getName()));
+    }
+
+    @Override
+    public void click(Player player, String id, InventoryAction action) {
+        // TODO: Implement
     }
 }

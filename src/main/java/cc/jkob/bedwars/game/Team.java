@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 
 import cc.jkob.bedwars.util.BlockUtil;
 
@@ -89,7 +90,11 @@ public class Team {
 
     public void destroyBed() {
         bedFeet.getBlock().setType(Material.AIR);
+        bedHead.getBlock().setType(Material.AIR);
         bedAlive = false;
+        game.getPlayerStream(false)
+            .filter(p -> players.contains(p.getUniqueId()))
+            .forEach(p -> p.playSound(p.getLocation(), Sound.ENDERDRAGON_GROWL, 1, 1));
     }
 
     public boolean hasBed() {

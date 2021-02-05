@@ -177,8 +177,10 @@ public class Game {
         shopkeepers.forEach(Shopkeeper::remove);
 
         // Stop game cycle
-        gameCycle.stop();
-        gameCycle = null;
+        if (gameCycle != null) {
+            gameCycle.stop();
+            gameCycle = null;
+        }
 
         players = spectators = null;
     }
@@ -245,7 +247,7 @@ public class Game {
         }
     }
 
-    private Stream<? extends Player> getPlayerStream(boolean withSpectators) {
+    public Stream<? extends Player> getPlayerStream(boolean withSpectators) {
         if (withSpectators)
             return Bukkit.getServer().getOnlinePlayers().parallelStream()
                 .filter(p -> players.contains(p.getUniqueId()) || spectators.contains(p.getUniqueId()));

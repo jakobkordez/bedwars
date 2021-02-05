@@ -1,14 +1,17 @@
 package cc.jkob.bedwars.shop;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import cc.jkob.bedwars.gui.InventoryGui;
 import cc.jkob.bedwars.util.FileUtil;
-import cc.jkob.bedwars.util.LangUtil;
 
-public abstract class Shop {
+public abstract class Shop implements InventoryGui {
     private static ItemShop itemShop;
     private static UpgradeShop upgradeShop;
 
@@ -39,38 +42,26 @@ public abstract class Shop {
         return null;
     }
 
-    public abstract Inventory buildInventory();
-
     protected static String formatCost(ItemStack cost) {
-        String curr, ret = "";
-        switch (cost.getType()) {
-            case IRON_INGOT:
-                ret += ChatColor.WHITE;
-                curr = "Iron";
-                break;
-            case GOLD_INGOT:
-                ret += ChatColor.GOLD;
-                curr = "Gold";
-                break;
-            case DIAMOND:
-                ret += ChatColor.AQUA;
-                curr = "Diamond";
-                break;
-            case EMERALD:
-                ret += ChatColor.DARK_GREEN;
-                curr = "Emerald";
-                break;
-            default:
-                ret += ChatColor.WHITE;
-                curr = LangUtil.capitalize(cost.getType().toString());
+        Currency currency = Currency.valueOf(cost.getType());
+
+        return "" + currency.color + cost.getAmount() + " " + currency.toString(cost.getAmount() > 1);
+    }
+
+    protected static Map<Material, Integer> getWallet(Player player) {
+        Map<Material, Integer> wallet = new HashMap<>();
+
+        ItemStack[] inv = player.getInventory().getContents();
+        for (int i = 0; i < inv.length; ++i) {
+            if (inv[i] == null) continue;
+
+            Currency currency = Currency.valueOf(inv[i].getType());
+            if (currency == null) continue;
+            
+            wallet.put(inv[i].getType(), wallet.getOrDefault(inv[i].getType(), 0) + inv[i].getAmount());
         }
-        ret += cost.getAmount() + " " + curr;
 
-        if (cost.getAmount() > 1)
-            if (cost.getType() == Material.DIAMOND || cost.getType() == Material.EMERALD)
-                ret += "s";
-
-        return ret;
+        return wallet;
     }
 
     public enum ShopType {
@@ -89,6 +80,46 @@ public abstract class Shop {
 
         public String getFormattedName() {
             return ChatColor.AQUA + name.toUpperCase();
+        }
+    }
+
+    public enum Currency {
+        IRON(Material.IRON_INGOT, "Iron", "Iron", ChatColor.WHITE),
+        GOLD(Material.GOLD_INGOT, "Gold", "Gold", ChatColor.GOLD),
+        DIAMOND(Material.DIAMOND, "Diamond", "Diamonds", ChatColor.AQUA),
+        EMERALD(Material.EMERALD, "Emerald", "Emeralds", ChatColor.DARK_GREEN);
+
+        public static Currency valueOf(Material material) {
+            Currency[] values = values();
+            for (int i = 0; i < values.length; ++i)
+                if (values[i].material == material)
+                    return values[i];
+            
+            return null;
+        }
+
+        public final Material material;
+        private final String name, pluralName;
+        public final ChatColor color;
+
+        private Currency(Material material, String name, String pluralName, ChatColor color) {
+            this.material = material;
+            this.name = name;
+            this.pluralName = pluralName;
+            this.color = color;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public String toString(boolean plural) {
+            return plural ? pluralName : name;
+        }
+
+        public String getFormattedName(boolean plural) {
+            return color + (plural ? pluralName : name);
         }
     }
 }

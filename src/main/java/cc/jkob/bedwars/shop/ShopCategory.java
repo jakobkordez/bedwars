@@ -12,7 +12,7 @@ public class ShopCategory implements ConfigurationSerializable {
     private String name;
     private ItemStack icon;
 
-    private List<ShopItem> items = new ArrayList<>();
+    private List<Integer> items = new ArrayList<>();
 
     public ShopCategory(String name, ItemStack icon) {
         this.name = name;
@@ -27,7 +27,7 @@ public class ShopCategory implements ConfigurationSerializable {
         return icon;
     }
 
-    public List<ShopItem> getItems() {
+    public List<Integer> getItems() {
         return items;
     }
 
@@ -47,7 +47,7 @@ public class ShopCategory implements ConfigurationSerializable {
             (ItemStack) args.get("icon"));
         
         for (Object item : (List<Object>) args.get("items"))
-            cat.items.add((ShopItem) item);
+            cat.items.add((int) item);
         
         return cat;
     }
