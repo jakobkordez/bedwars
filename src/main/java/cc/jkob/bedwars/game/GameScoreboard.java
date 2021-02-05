@@ -64,7 +64,7 @@ public class GameScoreboard {
         sidebar.getScore("  ").setScore(i--);
 
         teamScores = new HashMap<>();
-        for (Team team : game.getTeams().values()) {
+        for (Team team : game.getTeams()) {
             Score ts = sidebar.getScore(getTeamStatus(team));
             teamScores.put(team.getColor(), ts);
             ts.setScore(i--);
@@ -81,7 +81,7 @@ public class GameScoreboard {
         }
 
         stageScore = updateScore(stageScore, getNextStage());
-        for (Team team : game.getTeams().values()) {
+        for (Team team : game.getTeams()) {
             Score ts = teamScores.get(team.getColor());
             ts = updateScore(ts, getTeamStatus(team));
             teamScores.put(team.getColor(), ts);

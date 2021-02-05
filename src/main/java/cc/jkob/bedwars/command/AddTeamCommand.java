@@ -36,7 +36,7 @@ public class AddTeamCommand extends AdminCommand {
             throw new CommandException("Color is not valid");
         }
 
-        for (Team t : game.getTeams().values()) {
+        for (Team t : game.getTeams()) {
             if (t.getName().equals(args.get(1)))
                 throw new CommandException("Team with that name already exists");
             if (t.getColor().equals(col))
@@ -44,7 +44,7 @@ public class AddTeamCommand extends AdminCommand {
         }
 
         Team team = new Team(args.get(1), col);
-        game.getTeams().put(args.get(1), team);
+        game.getTeams().add(team);
 
         player.sendMessage(ChatColor.GREEN + "Team " + team.getFormattedName() + ChatColor.RESET + ChatColor.GREEN + " created");
         return true;

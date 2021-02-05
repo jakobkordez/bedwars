@@ -68,7 +68,7 @@ public class GameCycle {
                 new GameCycleTask(game, cycle){
                     @Override
                     public void run() {
-                        game.getTeams().forEach((k, t) -> t.destroyBed());
+                        game.getTeams().forEach(Team::destroyBed);
                         
                         super.run();
                     }

@@ -35,7 +35,7 @@ public abstract class BaseCommand {
     }
 
     protected final Team findTeam(String gameName, String teamName) throws CommandException {
-        Team team = findGame(gameName).getTeams().get(teamName);
+        Team team = findGame(gameName).getTeams().stream().filter(t -> t.getName() == teamName).findAny().orElse(null);
         if (team == null) throw new CommandException("Team with that name doesn't exist");
 
         return team;

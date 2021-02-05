@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public class Game {
     private String name, world;
-    private HashMap<String, Team> teams = new HashMap<>(); // TODO: List
+    private List<Team> teams = new ArrayList<>();
     private List<CommonGenerator> generators = new ArrayList<>();
     private List<Shopkeeper> shopkeepers = new ArrayList<>();
     private Location lobby;
@@ -46,7 +46,7 @@ public class Game {
         return world;
     }
 
-    public HashMap<String, Team> getTeams() {
+    public List<Team> getTeams() {
         return teams;
     }
 
@@ -93,7 +93,7 @@ public class Game {
 
         state = State.WAITING;
 
-        teams.forEach((k, t) -> t.init(this));
+        teams.forEach(t -> t.init(this));
         
         for (Entity entity : lobby.getWorld().getEntities())
             if (!(entity instanceof Player))
@@ -111,7 +111,7 @@ public class Game {
         autoAssignTeams();
 
         players.clear();
-        teams.forEach((k, t) -> players.addAll(t.getPlayers()));
+        teams.forEach(t -> players.addAll(t.getPlayers()));
 
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
@@ -120,7 +120,7 @@ public class Game {
 
         // Start generators
         generators.forEach(Generator::start);
-        for (Team team : teams.values())
+        for (Team team : teams)
             if (team.getPlayers().size() != 0)
                 team.startGens();
         
@@ -128,7 +128,7 @@ public class Game {
         shopkeepers.forEach(Shopkeeper::spawn);
 
         // Destroy beds without players
-        for (Team team : teams.values())
+        for (Team team : teams)
             if (team.getPlayers().size() == 0)
                 team.destroyBed();
         
@@ -171,7 +171,7 @@ public class Game {
 
         // Stop generators
         generators.forEach(Generator::stop);
-        teams.values().forEach(Team::stopGens);
+        teams.forEach(Team::stopGens);
 
         // Remove shopkeepers
         shopkeepers.forEach(Shopkeeper::remove);
@@ -188,7 +188,7 @@ public class Game {
     private void autoAssignTeams() {
         int maxPlayers = gameType.getPlayers();
 
-        List<Team> fTeams = new ArrayList<>(teams.values());
+        List<Team> fTeams = new ArrayList<>(teams);
         Collections.sort(fTeams, new SortByPlayers());
         Iterator<Team> teamIt = fTeams.iterator();
 
@@ -232,7 +232,7 @@ public class Game {
             case WAITING:
                 if (players.contains(pUuid)) return true;
                 if (spectators.contains(pUuid)) return true;
-                for (Team team : teams.values())
+                for (Team team : teams)
                     if (team.getPlayers().contains(pUuid))
                         return true;
                 return false;
