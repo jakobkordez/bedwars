@@ -1,13 +1,17 @@
 package cc.jkob.bedwars.listener;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.Game;
+import cc.jkob.bedwars.game.Team;
+import cc.jkob.bedwars.game.Game.State;
+
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.world.StructureGrowEvent;
-
-import java.util.logging.Level;
 
 public final class BlockListener implements Listener {
     private final BedWarsPlugin plugin;
@@ -20,17 +24,56 @@ public final class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
-        plugin.getLogger().log(Level.INFO, "Block Broken");
+        Block block = event.getBlock();
+
+        Game game = plugin.getGameManager().getGameByLocation(block.getLocation());
+        if (game == null) return;
+
+        if (game.getState() == State.STOPPED) return;
+
+        event.setCancelled(true);
+
+        if (game.getState() != State.RUNNING) return;
+
+        if (block.getState().getType() == Material.BED_BLOCK) {
+            Team team = game.getTeamByBed(block.getLocation());
+            if (team == null) return;
+
+            // TODO: Check if own bed
+            team.destroyBed();
+            return;
+        }
+
+        if (game.isPlacedBlock(block.getLocation())) {
+            event.setCancelled(false);
+            game.getPlacedBlocks().remove(block.getLocation());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent event) {
+        Block block = event.getBlock();
 
+        Game game = plugin.getGameManager().getGameByLocation(block.getLocation());
+        if (game == null) return;
+
+        if (game.getState() == State.STOPPED) return;
+        
+        if (game.getState() != State.RUNNING) {
+            event.setCancelled(true);
+            return;
+        }
+        
+        // TODO: Check invalid placement (spawns, gens, shops, ...)
+        // event.setCancelled(true);
+
+        game.getPlacedBlocks().add(block.getLocation());
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onIgnite(BlockIgniteEvent event) {
-
+        if (isEventInGame(event))
+            event.setCancelled(true);
     }
 
     // Cancel all other block events in games

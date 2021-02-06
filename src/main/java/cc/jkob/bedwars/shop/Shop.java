@@ -31,17 +31,6 @@ public abstract class Shop implements InventoryGui {
         return upgradeShop = new UpgradeShop();
     }
 
-    public static Shop getShopByType(ShopType type) {
-        switch (type) {
-            case ITEM:
-                return getItemShop();
-            case UPGRADE:
-                return getUpgradeShop();
-        }
-
-        return null;
-    }
-
     protected static String formatCost(ItemStack cost) {
         Currency currency = Currency.valueOf(cost.getType());
 
@@ -80,6 +69,17 @@ public abstract class Shop implements InventoryGui {
 
         public String getFormattedName() {
             return ChatColor.AQUA + name.toUpperCase();
+        }
+
+        public Shop getShop() {
+            switch (this) {
+                case ITEM:
+                    return getItemShop();
+                case UPGRADE:
+                    return getUpgradeShop();
+            }
+    
+            return null;
         }
     }
 

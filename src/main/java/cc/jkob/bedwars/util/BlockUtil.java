@@ -1,11 +1,14 @@
 package cc.jkob.bedwars.util;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Bed;
+import org.bukkit.material.Wool;
 
 public class BlockUtil {
     public static void placeBed(Location feet, Location head) {
@@ -51,5 +54,15 @@ public class BlockUtil {
             return b.getRelative(facing.getOppositeFace());
         else
             return b.getRelative(facing);
+    }
+
+    public static ItemStack getColoredStack(Material material, DyeColor color) {
+        return getColoredStack(material, color, 1);
+    }
+
+    public static ItemStack getColoredStack(Material material, DyeColor color, int amount) {
+        Wool w = new Wool(material);
+        w.setColor(color);
+        return w.toItemStack(amount);
     }
 }

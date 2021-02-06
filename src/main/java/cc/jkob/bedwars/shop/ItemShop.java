@@ -22,7 +22,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import cc.jkob.bedwars.gui.GuiType;
+import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.LangUtil;
+import cc.jkob.bedwars.util.PlayerUtil;
 
 public class ItemShop extends Shop implements ConfigurationSerializable {
     private static final int ROWS = 6;
@@ -55,16 +57,12 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
             invStacks[i] = createCategory(i);
 
         // Glass panes
-        ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE);
-        pane.setDurability(DyeColor.GRAY.getWoolData());
-
+        ItemStack pane = BlockUtil.getColoredStack(Material.STAINED_GLASS_PANE, DyeColor.GRAY);
         for (i = 9; i < 18; ++i)
             invStacks[i] = pane;
 
-        if (cIndex < 9) {
-            invStacks[9 + cIndex] = new ItemStack(Material.STAINED_GLASS_PANE);
-            invStacks[9 + cIndex].setDurability(DyeColor.GREEN.getWoolData());
-        }
+        if (cIndex < 9)
+            invStacks[9 + cIndex] = BlockUtil.getColoredStack(Material.STAINED_GLASS_PANE, DyeColor.GREEN);
 
         // Shop body
         String catTitle;
@@ -155,7 +153,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         inv.addItem(new ItemStack(item.getItem()));
 
         player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
-        player.playSound(player.getLocation(), Sound.NOTE_PLING, 1f, 1.8f);
+        PlayerUtil.playSound(player, Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     @Override

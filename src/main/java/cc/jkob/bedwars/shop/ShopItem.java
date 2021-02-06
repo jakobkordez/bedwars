@@ -11,6 +11,7 @@ public class ShopItem implements ConfigurationSerializable {
 
     private ItemStack item;
     private ItemStack price;
+    // TODO: Reward
 
     public ShopItem(String name, ItemStack item, ItemStack price) {
         this.name = name;

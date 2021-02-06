@@ -24,10 +24,14 @@ public class GameCycle {
     }
 
     public long getStageRemainingTicks() {
+        if (currStage == null) return 0;
+
         return currStage.task.getRemainingTicks();
     }
 
     public String getStageTitle() {
+        if (currStage == null) return null;
+        
         return currStage.title;
     }
 

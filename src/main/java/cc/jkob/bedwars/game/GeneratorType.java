@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import cc.jkob.bedwars.util.LangUtil;
 
 public enum GeneratorType {
-    IRON(30, 64, ChatColor.GRAY, Material.IRON_INGOT, Material.IRON_BLOCK),
+    IRON(30, 48, ChatColor.GRAY, Material.IRON_INGOT, Material.IRON_BLOCK),
     GOLD(90, 16, ChatColor.GOLD, Material.GOLD_INGOT, Material.GOLD_BLOCK),
     DIAMOND(600, 4, ChatColor.AQUA, Material.DIAMOND, Material.DIAMOND_BLOCK),
     EMERALD(1100, 2, ChatColor.GREEN, Material.EMERALD, Material.EMERALD_BLOCK);

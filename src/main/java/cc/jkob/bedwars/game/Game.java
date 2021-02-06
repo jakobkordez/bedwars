@@ -8,12 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
+import cc.jkob.bedwars.util.PlayerUtil;
 import cc.jkob.bedwars.util.SortByPlayers;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -66,11 +67,16 @@ public class Game {
         return gameType;
     }
 
+    public Team getTeamByBed(Location bed) {
+        return teams.parallelStream().filter(t -> t.isTeamBed(bed)).findAny().orElse(null);
+    }
+
     // transient
     private transient State state;
     private transient Set<UUID> players, spectators;
     private transient GameScoreboard scoreboard;
     private transient GameCycle gameCycle;
+    private transient List<Location> placedBlocks;
 
     public void initTransient() {
         state = State.STOPPED;
@@ -88,6 +94,14 @@ public class Game {
         return gameCycle;
     }
 
+    public List<Location> getPlacedBlocks() {
+        return placedBlocks;
+    }
+    
+    public boolean isPlacedBlock(Location location) {
+        return placedBlocks.parallelStream().anyMatch(l -> l.equals(location));
+    }
+
     public void init() {
         if (state != State.STOPPED) return;
 
@@ -101,6 +115,10 @@ public class Game {
         
         players = new HashSet<>();
         spectators = new HashSet<>();
+        placedBlocks = new ArrayList<>();
+
+        // Init game cycle
+        gameCycle = new GameCycle(this);
     }
 
     public void start() {
@@ -133,8 +151,9 @@ public class Game {
                 team.destroyBed();
         
         // Start game cycle
-        gameCycle = new GameCycle(this);
         gameCycle.triggerNext();
+
+        PlayerUtil.sendTitle(getPlayerStream(false), new Title(ChatColor.GOLD + "Good luck", "", 20, 40, 20));       
     }
 
     public void end(Team winner) {
@@ -142,19 +161,15 @@ public class Game {
 
         state = State.ENDED;
 
-        String ttitle = "" + ChatColor.GOLD + ChatColor.BOLD + "Tie";
-        String subTitle = "" + ChatColor.RED + ChatColor.BOLD + "Game Over";
-        if (winner != null) ttitle = "" + winner.getColor().getChatColor() + ChatColor.BOLD + " wins!";
-        String title = ttitle;
-
-        // TODO: packets?
-        getPlayerStream(true).forEach(p -> p.sendTitle(title, subTitle));
+        Title title = new Title(ChatColor.GOLD + "Tie", ChatColor.RED + "Game Over", 0, 80, 20);
+        if (winner != null) title.setTitle(winner.getColor().getChatColor() + winner.getName() + " wins!");
+        PlayerUtil.sendTitle(getPlayerStream(true), title);
 
         new BukkitRunnable(){
             public void run() {
                 stop();
             }
-        }.runTaskLater(BedWarsPlugin.getInstance(), 200);
+        }.runTaskLater(BedWarsPlugin.getInstance(), 100);
     }
 
     public void stop() {
@@ -177,12 +192,11 @@ public class Game {
         shopkeepers.forEach(Shopkeeper::remove);
 
         // Stop game cycle
-        if (gameCycle != null) {
-            gameCycle.stop();
-            gameCycle = null;
-        }
+        gameCycle.stop();
+        gameCycle = null;
 
         players = spectators = null;
+        placedBlocks = null;
     }
 
     private void autoAssignTeams() {
@@ -247,13 +261,15 @@ public class Game {
         }
     }
 
-    public Stream<? extends Player> getPlayerStream(boolean withSpectators) {
+    public Stream<Player> getPlayerStream(boolean withSpectators) {
         if (withSpectators)
             return Bukkit.getServer().getOnlinePlayers().parallelStream()
-                .filter(p -> players.contains(p.getUniqueId()) || spectators.contains(p.getUniqueId()));
+                .filter(p -> players.contains(p.getUniqueId()) || spectators.contains(p.getUniqueId()))
+                .map(p -> (Player) p);
         
         return Bukkit.getServer().getOnlinePlayers().parallelStream()
-            .filter(p -> players.contains(p.getUniqueId()));
+            .filter(p -> players.contains(p.getUniqueId()))
+            .map(p -> (Player) p);
     }
 
     public enum State {

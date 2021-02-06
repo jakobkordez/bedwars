@@ -6,18 +6,19 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.event.PlayerUseEntityEvent;
 import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.Game.State;
 import cc.jkob.bedwars.gui.GuiType;
-import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.LangUtil;
 
@@ -30,17 +31,15 @@ public class PlayerListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
-        plugin.getLogger().info(event.toString() + " " + (event.isCancelled() ? "canceled" : "not-canceled"));
-
-        if (event.isCancelled()) return;
         if (!isEventInGame(event)) return;
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
-            if (event.getClickedBlock().getType() == Material.BED_BLOCK)
-                if (!event.getPlayer().isSneaking())
-                    event.setCancelled(true);
+            if (event.getClickedBlock().getType() == Material.BED_BLOCK) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.ALLOW);
+            }
     }
 
     @EventHandler
@@ -57,10 +56,20 @@ public class PlayerListener implements Listener {
 
         if (!game.getPlayers().contains(player.getUniqueId())) return;
 
-        Shop.getShopByType(shopkeeper.getShopType()).open(player);
+        shopkeeper.getShopType().getShop().open(player);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    public void onPickupItem(PlayerPickupItemEvent event) {
+        Player player = event.getPlayer();
+
+        Game game = plugin.getGameManager().getGameByLocation(player.getLocation());
+        if (game == null) return;
+
+        // TODO: Split generators
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         if (!plugin.getGameManager().isLocationInGame(player.getLocation())) return;

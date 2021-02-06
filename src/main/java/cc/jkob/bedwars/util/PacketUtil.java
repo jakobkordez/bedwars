@@ -7,7 +7,9 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.comphenix.protocol.wrappers.EnumWrappers.TitleAction;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -44,6 +46,49 @@ public class PacketUtil {
         PacketContainer packet = getManager().createPacket(PacketType.Play.Server.ENTITY_DESTROY);
 
         packet.getIntegerArrays().write(0, ids);
+
+        return packet;
+    }
+
+    public static PacketContainer createTitlePacket(String title) {
+        PacketContainer packet = getManager().createPacket(PacketType.Play.Server.TITLE);
+
+        packet.getTitleActions()
+            .write(0, TitleAction.TITLE);
+
+        packet.getChatComponents()
+            .write(0, WrappedChatComponent.fromJson("{\"text\": \"" + title + "\"}"));
+
+        return packet;
+    }
+
+    public static PacketContainer createSubTitlePacket(String subTitle) {
+        PacketContainer packet = getManager().createPacket(PacketType.Play.Server.TITLE);
+
+        packet.getTitleActions().write(0, TitleAction.SUBTITLE);
+
+        packet.getChatComponents().write(0, WrappedChatComponent.fromText(subTitle));
+
+        return packet;
+    }
+
+    public static PacketContainer createTitleTimesPacket(int fadeIn, int stay, int fadeOut) {
+        PacketContainer packet = getManager().createPacket(PacketType.Play.Server.TITLE);
+
+        packet.getTitleActions().write(0, TitleAction.TIMES);
+
+        packet.getIntegers()
+            .write(0, fadeIn)
+            .write(1, stay)
+            .write(2, fadeOut);
+
+        return packet;
+    }
+
+    public static PacketContainer createTitleResetPacket() {
+        PacketContainer packet = getManager().createPacket(PacketType.Play.Server.TITLE);
+
+        packet.getTitleActions().write(0, TitleAction.RESET);
 
         return packet;
     }

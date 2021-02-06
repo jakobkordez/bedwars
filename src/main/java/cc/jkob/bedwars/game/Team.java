@@ -3,12 +3,17 @@ package cc.jkob.bedwars.game;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 
+import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.util.BlockUtil;
+import cc.jkob.bedwars.util.PlayerUtil;
 
 public class Team {
     private String name;
@@ -92,9 +97,11 @@ public class Team {
         bedFeet.getBlock().setType(Material.AIR);
         bedHead.getBlock().setType(Material.AIR);
         bedAlive = false;
-        game.getPlayerStream(false)
-            .filter(p -> players.contains(p.getUniqueId()))
-            .forEach(p -> p.playSound(p.getLocation(), Sound.ENDERDRAGON_GROWL, 1, 1));
+
+        PlayerUtil.playSound(getPlayerStream(), Sound.ENDERDRAGON_GROWL);
+        PlayerUtil.sendTitle(getPlayerStream(), new Title(
+            "" + ChatColor.RED + ChatColor.BOLD + "Bed Destroyed",
+            "You will no longer respawn", 0, 40, 20));
     }
 
     public boolean hasBed() {
@@ -109,5 +116,10 @@ public class Team {
 
     public Set<UUID> getPlayers() {
         return players;
+    }
+
+    public Stream<Player> getPlayerStream() {
+        return game.getPlayerStream(false)
+            .filter(p -> players.contains(p.getUniqueId()));
     }
 }
