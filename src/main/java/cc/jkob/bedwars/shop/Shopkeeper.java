@@ -65,6 +65,7 @@ public class Shopkeeper {
     public void sendSpawnPacket(Player player) {
         if (spawnPacket == null) spawnPacket = PacketUtil.createSpawnPacket(eId, loc, EntityType.VILLAGER);
 
+        // TODO: Fix respawning
         PacketUtil.sendPacket(player, spawnPacket);
     }
 

@@ -6,12 +6,13 @@ import java.util.Map;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 
-public class ShopItem implements ConfigurationSerializable {
-    private String name;
+import cc.jkob.bedwars.game.Game.PlayerData;
 
-    private ItemStack item;
+public class ShopItem implements ConfigurationSerializable {
+
+    protected String name;
+    protected ItemStack item;
     private ItemStack price;
-    // TODO: Reward
 
     public ShopItem(String name, ItemStack item, ItemStack price) {
         this.name = name;
@@ -30,6 +31,14 @@ public class ShopItem implements ConfigurationSerializable {
     public ItemStack getPrice() {
         return price;
     }
+
+    public boolean canBuy(PlayerData player) {
+        return true;
+    }
+
+    public void give(PlayerData player) {
+        player.getPlayer().getInventory().addItem(item.clone());
+    }
     
     @Override
     public Map<String, Object> serialize() {
@@ -46,4 +55,5 @@ public class ShopItem implements ConfigurationSerializable {
             (ItemStack) args.get("item"),
             (ItemStack) args.get("price"));
     }
+
 }

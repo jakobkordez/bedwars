@@ -21,6 +21,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.Game.PlayerData;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.LangUtil;
@@ -126,13 +128,13 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         return stack;
     }
 
-    private void buy(Player player, ShopItem item) {
-        Inventory inv = player.getInventory();
+    private void buy(PlayerData player, ShopItem item) {
+        Inventory inv = player.getPlayer().getInventory();
 
         ItemStack price = item.getPrice();
 
         if (!inv.contains(price.getType(), price.getAmount())) {
-            player.sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
+            player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
             return;
         }
 
@@ -150,10 +152,14 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
                 sum -= sub;
             }
 
-        inv.addItem(new ItemStack(item.getItem()));
+        if (!item.canBuy(player)) {
+            player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
+            return;
+        }
 
-        player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
-        PlayerUtil.playSound(player, Sound.NOTE_PLING, 1f, 1.5f);
+        item.give(player);
+        player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
+        PlayerUtil.playSound(player.getPlayer(), Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     @Override
@@ -165,10 +171,11 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
         switch (tType) {
             case CATEGORY:
-                open(player, Integer.parseInt(ids[1]));
+                open(player.getPlayer(), Integer.parseInt(ids[1]));
                 break;
             case BUY:
-                buy(player, items.get(Integer.parseInt(ids[1])));
+                PlayerData playerData = BedWarsPlugin.getInstance().getGameManager().getGameByPlayer(player).getPlayers().get(player.getUniqueId());
+                buy(playerData, items.get(Integer.parseInt(ids[1])));
                 break;
         }
     }

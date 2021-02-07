@@ -1,7 +1,7 @@
 item_shop:
   ==: cc.jkob.bedwars.shop.ItemShop
   items:
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.DyableShopItem
     name: Wool
     item:
       ==: org.bukkit.inventory.ItemStack
@@ -11,8 +11,9 @@ item_shop:
       ==: org.bukkit.inventory.ItemStack
       type: IRON_INGOT
       amount: 4
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.DyableShopItem
     name: Hardened Clay
+    material: STAINED_CLAY
     item:
       ==: org.bukkit.inventory.ItemStack
       type: HARD_CLAY
@@ -21,8 +22,9 @@ item_shop:
       ==: org.bukkit.inventory.ItemStack
       type: IRON_INGOT
       amount: 12
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.DyableShopItem
     name: Blast-Proof Glass
+    material: STAINED_GLASS
     item:
       ==: org.bukkit.inventory.ItemStack
       type: GLASS

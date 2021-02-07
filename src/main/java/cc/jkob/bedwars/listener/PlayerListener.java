@@ -54,7 +54,7 @@ public class PlayerListener implements Listener {
         Shopkeeper shopkeeper = game.getShopkeepers().stream().filter(s -> s.geteId() == event.getEntityId()).findAny().orElse(null);
         if (shopkeeper == null) return;
 
-        if (!game.getPlayers().contains(player.getUniqueId())) return;
+        if (!game.getPlayers().containsKey(player.getUniqueId())) return;
 
         shopkeeper.getShopType().getShop().open(player);
     }

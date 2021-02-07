@@ -1,8 +1,6 @@
 package cc.jkob.bedwars.game;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.bukkit.ChatColor;
@@ -11,6 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import cc.jkob.bedwars.game.Game.PlayerData;
+import cc.jkob.bedwars.game.Game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.PlayerUtil;
@@ -71,12 +71,10 @@ public class Team {
 
     // transient
     private transient Game game;
-    private transient Set<UUID> players;
     private transient boolean bedAlive;
 
     public void init(Game game) {
         this.game = game;
-        players = new HashSet<>();
         bedAlive = true;
 
         if (bedFeet.getBlock().isEmpty() || bedHead.getBlock().isEmpty())
@@ -109,17 +107,22 @@ public class Team {
     }
 
     public int playersAlive() {
-        Set<UUID> res = new HashSet<>(players);
-        res.retainAll(game.getPlayers());
-        return res.size();
+        return (int) game.getPlayers().values().parallelStream()
+            .filter(p -> p.getTeam() == this)
+            .filter(p -> p.getState() == PlayerState.ALIVE)
+            .count();
     }
 
-    public Set<UUID> getPlayers() {
-        return players;
+    public int getPlayerCount() {
+        return (int) game.getPlayers().values().parallelStream()
+            .filter(p -> p.getTeam() == this)
+            .count();
     }
 
     public Stream<Player> getPlayerStream() {
-        return game.getPlayerStream(false)
-            .filter(p -> players.contains(p.getUniqueId()));
+        return game.getPlayers().values().parallelStream()
+            .filter(p -> p.getTeam() == this)
+            .map(PlayerData::getPlayer)
+            .filter(Objects::nonNull);
     }
 }

@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.Game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.PlayerUtil;
@@ -15,10 +16,11 @@ import cc.jkob.bedwars.util.SortByPlayers;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -73,7 +75,7 @@ public class Game {
 
     // transient
     private transient State state;
-    private transient Set<UUID> players, spectators;
+    private transient Map<UUID, PlayerData> players;
     private transient GameScoreboard scoreboard;
     private transient GameCycle gameCycle;
     private transient List<Location> placedBlocks;
@@ -86,7 +88,7 @@ public class Game {
         return state;
     }
 
-    public Set<UUID> getPlayers() {
+    public Map<UUID, PlayerData> getPlayers() {
         return players;
     }
 
@@ -113,8 +115,7 @@ public class Game {
             if (!(entity instanceof Player))
                 entity.remove();
         
-        players = new HashSet<>();
-        spectators = new HashSet<>();
+        players = new HashMap<>();
         placedBlocks = new ArrayList<>();
 
         // Init game cycle
@@ -128,9 +129,6 @@ public class Game {
         
         autoAssignTeams();
 
-        players.clear();
-        teams.forEach(t -> players.addAll(t.getPlayers()));
-
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
         scoreboard.startTask();
@@ -139,7 +137,7 @@ public class Game {
         // Start generators
         generators.forEach(Generator::start);
         for (Team team : teams)
-            if (team.getPlayers().size() != 0)
+            if (team.getPlayerCount() != 0)
                 team.startGens();
         
         // Spawn shopkeepers
@@ -147,9 +145,11 @@ public class Game {
 
         // Destroy beds without players
         for (Team team : teams)
-            if (team.getPlayers().size() == 0)
+            if (team.getPlayerCount() == 0)
                 team.destroyBed();
-        
+
+        players.values().parallelStream().filter(p -> p.team != null).forEach(p -> p.setState(PlayerState.ALIVE));
+
         // Start game cycle
         gameCycle.triggerNext();
 
@@ -195,7 +195,7 @@ public class Game {
         gameCycle.stop();
         gameCycle = null;
 
-        players = spectators = null;
+        players = null;
         placedBlocks = null;
     }
 
@@ -207,17 +207,18 @@ public class Game {
         Iterator<Team> teamIt = fTeams.iterator();
 
         Team cTeam = teamIt.next();
-        while (cTeam.getPlayers().size() >= maxPlayers)
+        while (cTeam.getPlayerCount() >= maxPlayers)
             if (teamIt.hasNext()) cTeam = teamIt.next();
             else break;
 
-        for (UUID player : players)
-            if (cTeam.getPlayers().size() < maxPlayers)
-                cTeam.getPlayers().add(player);
-            else if (teamIt.hasNext())
-                cTeam = teamIt.next();
-            else
-                spectators.add(player);
+        for (PlayerData player : players.values()) {
+            while (player.team == null) 
+                if (cTeam.getPlayerCount() < maxPlayers)
+                    player.setTeam(cTeam);
+                else if (teamIt.hasNext())
+                    cTeam = teamIt.next();
+                else break;
+        }
     }
 
     public boolean joinPlayer(Player player) {
@@ -226,11 +227,8 @@ public class Game {
         switch (state) {
             
             case WAITING:
-                players.add(player.getUniqueId());
-                return true;
-
             case RUNNING:
-                spectators.add(player.getUniqueId());
+                players.put(player.getUniqueId(), new PlayerData(player));
                 return true;
             
             default:
@@ -244,42 +242,68 @@ public class Game {
         switch (state) {
 
             case WAITING:
-                if (players.contains(pUuid)) return true;
-                if (spectators.contains(pUuid)) return true;
-                for (Team team : teams)
-                    if (team.getPlayers().contains(pUuid))
-                        return true;
-                return false;
-
             case RUNNING:
-                if (players.contains(pUuid)) return true;
-                if (spectators.contains(pUuid)) return true;
-                return false;
-
+                if (players.containsKey(pUuid)) return true;
             default:
                 return false;
         }
     }
 
     public Stream<Player> getPlayerStream(boolean withSpectators) {
-        if (withSpectators)
-            return Bukkit.getServer().getOnlinePlayers().parallelStream()
-                .filter(p -> players.contains(p.getUniqueId()) || spectators.contains(p.getUniqueId()))
-                .map(p -> (Player) p);
+        Stream<PlayerData> playerStream = players.values().parallelStream();
         
-        return Bukkit.getServer().getOnlinePlayers().parallelStream()
-            .filter(p -> players.contains(p.getUniqueId()))
-            .map(p -> (Player) p);
+        if (!withSpectators)
+            playerStream = playerStream.filter(p -> !p.isSpectator());
+        
+        return playerStream.map(PlayerData::getPlayer).filter(Objects::nonNull);
     }
 
-    public enum State {
+    public static class PlayerData {
+        public final UUID id;
+        private Team team;
+        private PlayerState state;
+
+        public PlayerData(Player player) {
+            id = player.getUniqueId();
+        }
+
+        public Player getPlayer() {
+            return Bukkit.getPlayer(id);
+        }
+
+        public boolean isSpectator() {
+            return team == null;
+        }
+
+        public void setTeam(Team team) {
+            this.team = team;
+        }
+
+        public Team getTeam() {
+            return team;
+        }
+
+        public PlayerState getState() {
+            return state;
+        }
+
+        public void setState(PlayerState state) {
+            this.state = state;
+        }
+
+        public static enum PlayerState {
+            SPECTATING, ALIVE, RESPAWNING, DISCONNECTED, DEAD
+        }
+    }
+
+    public static enum State {
         STOPPED,
         WAITING,
         RUNNING,
         ENDED
     }
 
-    public enum Type {
+    public static enum Type {
         SOLOS(1),
         DOUBLES(2),
         THREES(3),
