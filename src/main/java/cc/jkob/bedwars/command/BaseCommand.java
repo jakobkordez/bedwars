@@ -2,6 +2,7 @@ package cc.jkob.bedwars.command;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
+import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.Team;
 import org.bukkit.command.CommandException;
 import org.bukkit.entity.Player;
@@ -28,14 +29,17 @@ public abstract class BaseCommand {
     public abstract boolean requiresOp();
 
     protected final Game findGame(String gameName) throws CommandException {
-        Game game = plugin.getGameManager().getGame(gameName);
+        Game game = GameManager.instance.getGameByName(gameName);
         if (game == null) throw new CommandException("Game with that name doesn't exist");
 
         return game;
     }
 
     protected final Team findTeam(String gameName, String teamName) throws CommandException {
-        Team team = findGame(gameName).getTeams().stream().filter(t -> t.getName() == teamName).findAny().orElse(null);
+        Team team = findGame(gameName).getTeams().parallelStream()
+            .filter(t -> t.getName().equalsIgnoreCase(teamName))
+            .findAny().orElse(null);
+
         if (team == null) throw new CommandException("Team with that name doesn't exist");
 
         return team;

@@ -27,7 +27,7 @@ public class StopGameCommand extends AdminCommand {
 
     @Override
     public boolean execute(Player player, List<String> args) throws CommandException {
-        Game game = plugin.getGameManager().getGame(args.get(0));
+        Game game = findGame(args.get(0));
 
         if (game.getState() == State.STOPPED)
             throw new CommandException("Game already stopped");

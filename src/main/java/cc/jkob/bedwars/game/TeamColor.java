@@ -11,7 +11,7 @@ public enum TeamColor {
     AQUA(ChatColor.AQUA, "A", DyeColor.CYAN),
     WHITE(ChatColor.WHITE, "W", DyeColor.WHITE),
     PINK(ChatColor.LIGHT_PURPLE, "P", DyeColor.PINK),
-    GRAY(ChatColor.GRAY, "G", DyeColor.GRAY);
+    GRAY(ChatColor.DARK_GRAY, "G", DyeColor.GRAY);
 
     private final ChatColor chatColor;
     private final String prefix;

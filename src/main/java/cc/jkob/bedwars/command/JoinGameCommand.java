@@ -26,12 +26,7 @@ public class JoinGameCommand extends PlayerCommand {
 
     @Override
     public boolean execute(Player player, List<String> args) throws CommandException {
-        GameManager manager = plugin.getGameManager();
-
-        if (manager.isPlayerInGame(player))
-            throw new CommandException("You are already in a game");
-        
-        if (!findGame(args.get(0)).joinPlayer(player))
+        if (!GameManager.instance.getPlayer(player).joinGame(findGame(args.get(0))))
             throw new CommandException("Could not join the game");
         
         player.sendMessage(ChatColor.GREEN + "Game joined");

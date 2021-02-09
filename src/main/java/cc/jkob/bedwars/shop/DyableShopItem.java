@@ -5,8 +5,8 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Team;
-import cc.jkob.bedwars.game.Game.PlayerData;
 import cc.jkob.bedwars.util.BlockUtil;
 
 public class DyableShopItem extends ShopItem {

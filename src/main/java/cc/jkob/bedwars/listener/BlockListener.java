@@ -2,31 +2,29 @@ package cc.jkob.bedwars.listener;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
+import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.Team;
 import cc.jkob.bedwars.game.Game.State;
+import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.world.StructureGrowEvent;
 
-public final class BlockListener implements Listener {
-    private final BedWarsPlugin plugin;
+public final class BlockListener extends BaseListener {
 
     public BlockListener(BedWarsPlugin plugin) {
-        this.plugin = plugin;
-
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        super(plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
 
-        Game game = plugin.getGameManager().getGameByLocation(block.getLocation());
+        Game game = GameManager.instance.getGameByWorld(block.getWorld());
         if (game == null) return;
 
         if (game.getState() == State.STOPPED) return;
@@ -39,8 +37,8 @@ public final class BlockListener implements Listener {
             Team team = game.getTeamByBed(block.getLocation());
             if (team == null) return;
 
-            // TODO: Check if own bed
-            team.destroyBed();
+            if (!team.destroyBed(game.getPlayer(event.getPlayer())))
+                event.getPlayer().sendMessage(ChatColor.RED + "You cannot break your own bed");
             return;
         }
 
@@ -54,7 +52,7 @@ public final class BlockListener implements Listener {
     public void onPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
 
-        Game game = plugin.getGameManager().getGameByLocation(block.getLocation());
+        Game game = GameManager.instance.getGameByWorld(block.getLocation());
         if (game == null) return;
 
         if (game.getState() == State.STOPPED) return;
@@ -109,11 +107,11 @@ public final class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onStructureGrow(StructureGrowEvent event) {
-        if (plugin.getGameManager().isLocationInGame(event.getLocation()))
+        if (GameManager.instance.getGameByWorld(event.getLocation()) != null)
             event.setCancelled(true);
     }
 
     private boolean isEventInGame(BlockEvent event) {
-        return plugin.getGameManager().isLocationInGame(event.getBlock().getLocation());
+        return GameManager.instance.getGameByWorld(event.getBlock().getWorld()) != null;
     }
 }

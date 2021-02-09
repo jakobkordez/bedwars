@@ -21,8 +21,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.game.Game.PlayerData;
+import cc.jkob.bedwars.game.GameManager;
+import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.LangUtil;
@@ -159,7 +159,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
         item.give(player);
         player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
-        PlayerUtil.playSound(player.getPlayer(), Sound.NOTE_PLING, 1f, 1.5f);
+        PlayerUtil.playSound(player, Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
                 open(player.getPlayer(), Integer.parseInt(ids[1]));
                 break;
             case BUY:
-                PlayerData playerData = BedWarsPlugin.getInstance().getGameManager().getGameByPlayer(player).getPlayers().get(player.getUniqueId());
+                PlayerData playerData = GameManager.instance.getPlayer(player);
                 buy(playerData, items.get(Integer.parseInt(ids[1])));
                 break;
         }

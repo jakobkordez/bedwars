@@ -3,37 +3,77 @@ package cc.jkob.bedwars.listener;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.event.PlayerUseEntityEvent;
 import cc.jkob.bedwars.game.Game;
+import cc.jkob.bedwars.game.GameManager;
+import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.LangUtil;
 
-public class PlayerListener implements Listener {
-    private final BedWarsPlugin plugin;
+public class PlayerListener extends BaseListener {
 
     public PlayerListener(BedWarsPlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
+    }
 
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    @EventHandler(ignoreCancelled = true)
+    public void onDamage(EntityDamageByBlockEvent event) {
+        if (event.getEntityType() != EntityType.PLAYER) return;
+        Player player = (Player) event.getEntity();
+        
+        Game game = GameManager.instance.getGameByPlayer(player);
+        if (game == null) return;
+
+        if (game.getState() == State.STOPPED) return;
+
+        event.setCancelled(true);
+
+        PlayerData playerData = game.getPlayer(player);
+
+        if (playerData.getState() == PlayerState.ALIVE) {
+            playerData.setState(PlayerState.RESPAWNING);
+            return;
+        }
+
+        if (playerData.isSpectator()) {
+            playerData.setState(PlayerState.SPECTATING);
+            return;
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        System.out.println(event.toString());
+        // TODO: Implement
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onDeath(EntityDeathEvent event) {
+        System.out.println(event.toString());
+        // TODO: Implement
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
-        if (!isEventInGame(event)) return;
+        if (GameManager.instance.getGameByPlayer(event.getPlayer()) == null) return;
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
             if (event.getClickedBlock().getType() == Material.BED_BLOCK) {
@@ -46,12 +86,14 @@ public class PlayerListener implements Listener {
     public void onUseEntity(PlayerUseEntityEvent event) {
         Player player = event.getPlayer();
 
-        Game game = plugin.getGameManager().getGameByLocation(player.getLocation());
+        Game game = GameManager.instance.getGameByPlayer(player);
         if (game == null) return;
 
         if (game.getState() != State.RUNNING) return;
 
-        Shopkeeper shopkeeper = game.getShopkeepers().stream().filter(s -> s.geteId() == event.getEntityId()).findAny().orElse(null);
+        Shopkeeper shopkeeper = game.getShopkeepers().parallelStream()
+            .filter(s -> s.geteId() == event.getEntityId())
+            .findAny().orElse(null);
         if (shopkeeper == null) return;
 
         if (!game.getPlayers().containsKey(player.getUniqueId())) return;
@@ -63,16 +105,28 @@ public class PlayerListener implements Listener {
     public void onPickupItem(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
 
-        Game game = plugin.getGameManager().getGameByLocation(player.getLocation());
+        Game game = GameManager.instance.getGameByPlayer(player);
         if (game == null) return;
 
         // TODO: Split generators
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onCraft(CraftItemEvent event) {
+        Player player = (Player) event.getWhoClicked();
+
+        Game game = GameManager.instance.getGameByPlayer(player);
+        if (game == null) return;
+
+        if (game.getState() == State.STOPPED) return;
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
-        if (!plugin.getGameManager().isLocationInGame(player.getLocation())) return;
+        if (GameManager.instance.getGameByPlayer(player) == null) return;
 
         if (event.getInventory().getName().startsWith("container.")) return;
 
@@ -89,9 +143,5 @@ public class PlayerListener implements Listener {
         if (hSplit.length == 1) return;
         int gt = Integer.parseInt(hSplit[0]);
         GuiType.values()[gt].getGui().click(player, hSplit[1], event.getAction());
-    }
-
-    private boolean isEventInGame(PlayerEvent event) {
-        return plugin.getGameManager().isLocationInGame(event.getPlayer().getLocation());
     }
 }

@@ -1,10 +1,10 @@
-name: cc.jkob.bedwars
-main: cc.jkob.bedwars.BedWarsPlugin
-version: 1.0
+name: ${artifactId}
+main: ${groupId}.${artifactId}
+version: ${version}
 
 depend: [ProtocolLib]
 
 commands:
   bw:
-    description: Yo
+    description: BedWars plugin
     usage: /<command> help

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 
-import cc.jkob.bedwars.game.Game.PlayerData;
+import cc.jkob.bedwars.game.PlayerData;
 
 public class ShopItem implements ConfigurationSerializable {
 

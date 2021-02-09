@@ -15,10 +15,10 @@ public class GeneratorUpgradeTask extends GameCycleTask {
 
     @Override
     public void run() {
-        game.getGenerators().stream()
+        game.getGenerators().parallelStream()
             .filter(g -> g.getType() == genType)
             .forEach(Generator::upgrade);
-        
+
         super.run();
     }
 }

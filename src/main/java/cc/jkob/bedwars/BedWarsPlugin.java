@@ -1,6 +1,5 @@
 package cc.jkob.bedwars;
 
-import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.listener.BlockListener;
 import cc.jkob.bedwars.listener.InteractPacketListener;
 import cc.jkob.bedwars.listener.PlayerListener;
@@ -23,12 +22,9 @@ public class BedWarsPlugin extends JavaPlugin {
         return instance;
     }
 
-    private GameManager gameManager;
-
     @Override
     public void onEnable() {
         instance = this;
-        gameManager = new GameManager();
 
         ConfigurationSerialization.registerClass(ShopItem.class);
         ConfigurationSerialization.registerClass(DyableShopItem.class);
@@ -48,9 +44,5 @@ public class BedWarsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-    }
-
-    public GameManager getGameManager() {
-        return gameManager;
     }
 }

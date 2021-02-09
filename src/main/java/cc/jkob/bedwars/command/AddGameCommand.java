@@ -26,10 +26,10 @@ public class AddGameCommand extends AdminCommand {
 
     @Override
     public boolean execute(Player player, List<String> args) {
-        GameManager manager = plugin.getGameManager();
-        if (manager.hasGame(args.get(0))) throw new CommandException("Game with that name already exists");
+        if (GameManager.instance.getGameByName(args.get(0)) != null)
+            throw new CommandException("Game with that name already exists");
 
-        manager.addGame(new Game(args.get(0), player.getWorld().getName()));
+        GameManager.instance.addGame(new Game(args.get(0), player.getWorld().getName()));
 
         player.sendMessage(ChatColor.GREEN + "Game created");
         return true;

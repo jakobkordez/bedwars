@@ -2,65 +2,83 @@ package cc.jkob.bedwars.game;
 
 import cc.jkob.bedwars.util.FileUtil;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class GameManager {
+    public static final GameManager instance = new GameManager();
+
+    private final HashMap<UUID, PlayerData> players = new HashMap<>();
     private final HashMap<String, Game> games = new HashMap<>();
 
-    public GameManager() {
+    private GameManager() {
         for (Game game : FileUtil.loadGames()) {
             game.initTransient();
             games.put(game.getName(), game);
         }
     }
 
-    public Collection<Game> getGames() {
-        return games.values();
-    }
-
     public void addGame(Game game) {
         games.put(game.getName(), game);
     }
 
-    public Game getGame(String name) {
-        return games.get(name);
+    // Get Player Data //
+    public PlayerData getPlayer(Player player) {
+        return getPlayer(player.getUniqueId());
+    }
+
+    public PlayerData getPlayer(UUID id) {
+        PlayerData player = players.getOrDefault(id, null);
+        if (player != null) return player;
+
+        player = new PlayerData(id);
+        players.put(id, player);
+        return player;
+    }
+
+    // By Name //
+    public Game getGameByName(String name) {
+        Game game = games.get(name);
+        if (game != null) return game;
+
+        // Game[] gameArr = (Game[]) games.values().parallelStream()
+        //     .filter(g -> g.getName().toLowerCase().startsWith(name.toLowerCase()))
+        //     .toArray();
+
+        // if (gameArr.length == 1) return gameArr[0];
+        return null;
+    }
+
+    // By World //
+    public Game getGameByWorld(Entity entity) {
+        return getGameByWorld(entity.getWorld());
+    }
+
+    public Game getGameByWorld(Location location) {
+        return getGameByWorld(location.getWorld());
+    }
+
+    public Game getGameByWorld(World world) {
+        return getGameByWorld(world.getName());
     }
 
     public Game getGameByWorld(String world) {
-        if (world == null) return null;
-
-        for (Game game : getGames())
-            if (game.getWorld().equals(world))
-                return game;
-
-        return null;
+        return games.values().parallelStream()
+            .filter(g -> g.getWorld().equals(world))
+            .findAny().orElse(null);
     }
 
-    public Game getGameByLocation(Location location) {
-        return getGameByWorld(location.getWorld().getName());
-    }
-
-    public boolean isLocationInGame(Location location) {
-        return getGameByLocation(location) != null;
-    }
-
+    // By player //
     public Game getGameByPlayer(Player player) {
-        for (Game game : games.values())
-            if (game.isPlayerInGame(player))
-                return game;
-
-        return null;
+        return getGameByPlayer(player.getUniqueId());
     }
 
-    public boolean isPlayerInGame(Player player) {
-        return getGameByPlayer(player) != null;
-    }
-
-    public boolean hasGame(String name) {
-        return games.containsKey(name);
+    public Game getGameByPlayer(UUID player) {
+        return getPlayer(player).getGame();
     }
 }

@@ -1,16 +1,13 @@
 package cc.jkob.bedwars.game;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 
-import cc.jkob.bedwars.game.Game.PlayerData;
-import cc.jkob.bedwars.game.Game.PlayerData.PlayerState;
+import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.PlayerUtil;
@@ -96,10 +93,20 @@ public class Team {
         bedHead.getBlock().setType(Material.AIR);
         bedAlive = false;
 
-        PlayerUtil.playSound(getPlayerStream(), Sound.ENDERDRAGON_GROWL);
+        PlayerUtil.playSound(getPlayerStream(), Sound.WITHER_DEATH);
         PlayerUtil.sendTitle(getPlayerStream(), new Title(
             "" + ChatColor.RED + ChatColor.BOLD + "Bed Destroyed",
             "You will no longer respawn", 0, 40, 20));
+    }
+
+    public boolean destroyBed(PlayerData player) {
+        if (player.getTeam() == this) return false;
+
+        destroyBed();
+        Stream<PlayerData> other = game.getPlayerStream(true).filter(p -> p.getTeam() != this);
+        PlayerUtil.playSound(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
+        game.broadcastIngame(getFormattedName() + " Bed" + ChatColor.GRAY + " was destroyed by " + player.getFormattedName());
+        return true;
     }
 
     public boolean hasBed() {
@@ -107,22 +114,17 @@ public class Team {
     }
 
     public int playersAlive() {
-        return (int) game.getPlayers().values().parallelStream()
-            .filter(p -> p.getTeam() == this)
-            .filter(p -> p.getState() == PlayerState.ALIVE)
+        return (int) getPlayerStream()
+            .filter(p -> p.getState() == PlayerState.ALIVE || p.getState() == PlayerState.RESPAWNING)
             .count();
     }
 
     public int getPlayerCount() {
-        return (int) game.getPlayers().values().parallelStream()
-            .filter(p -> p.getTeam() == this)
-            .count();
+        return (int) getPlayerStream().count();
     }
 
-    public Stream<Player> getPlayerStream() {
+    public Stream<PlayerData> getPlayerStream() {
         return game.getPlayers().values().parallelStream()
-            .filter(p -> p.getTeam() == this)
-            .map(PlayerData::getPlayer)
-            .filter(Objects::nonNull);
+            .filter(p -> p.getTeam() == this);
     }
 }

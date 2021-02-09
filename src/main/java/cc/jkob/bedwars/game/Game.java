@@ -1,6 +1,5 @@
 package cc.jkob.bedwars.game;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -8,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.game.Game.PlayerData.PlayerState;
+import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.PlayerUtil;
@@ -20,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -74,6 +72,7 @@ public class Game {
     }
 
     // transient
+    private transient UUID instanceId;
     private transient State state;
     private transient Map<UUID, PlayerData> players;
     private transient GameScoreboard scoreboard;
@@ -88,8 +87,20 @@ public class Game {
         return state;
     }
 
+    public UUID getInstanceId() {
+        return instanceId;
+    }
+
     public Map<UUID, PlayerData> getPlayers() {
         return players;
+    }
+
+    public PlayerData getPlayer(Player player) {
+        return players.get(player.getUniqueId());
+    }
+
+    public void broadcastIngame(String ...msgs) {
+        PlayerUtil.sendMessage(getPlayerStream(true), msgs);
     }
 
     public GameCycle getGameCycle() {
@@ -108,6 +119,7 @@ public class Game {
         if (state != State.STOPPED) return;
 
         state = State.WAITING;
+        instanceId = UUID.randomUUID();
 
         teams.forEach(t -> t.init(this));
         
@@ -132,7 +144,7 @@ public class Game {
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
         scoreboard.startTask();
-        getPlayerStream(true).forEach(p -> p.setScoreboard(scoreboard.getBoard()));
+        getPlayerStream(true).forEach(p -> p.getPlayer().setScoreboard(scoreboard.getBoard()));
 
         // Start generators
         generators.forEach(Generator::start);
@@ -148,12 +160,16 @@ public class Game {
             if (team.getPlayerCount() == 0)
                 team.destroyBed();
 
-        players.values().parallelStream().filter(p -> p.team != null).forEach(p -> p.setState(PlayerState.ALIVE));
+        players.values().parallelStream()
+            .filter(p -> p.getTeam() != null)
+            .forEach(p -> p.setState(PlayerState.ALIVE));
 
         // Start game cycle
         gameCycle.triggerNext();
 
-        PlayerUtil.sendTitle(getPlayerStream(false), new Title(ChatColor.GOLD + "Good luck", "", 20, 40, 20));       
+        players.values().parallelStream()
+            .filter(p -> p.getTeam() != null)
+            .forEach(p -> p.setState(PlayerState.ALIVE));
     }
 
     public void end(Team winner) {
@@ -181,7 +197,7 @@ public class Game {
         if (scoreboard != null) {
             scoreboard.stopTask();
             scoreboard = null;
-            getPlayerStream(true).forEach(p -> p.setScoreboard(GameScoreboard.EMPTY));
+            getPlayerStream(true).forEach(p -> p.getPlayer().setScoreboard(GameScoreboard.EMPTY));
         }
 
         // Stop generators
@@ -212,7 +228,7 @@ public class Game {
             else break;
 
         for (PlayerData player : players.values()) {
-            while (player.team == null) 
+            while (player.getTeam() == null) 
                 if (cTeam.getPlayerCount() < maxPlayers)
                     player.setTeam(cTeam);
                 else if (teamIt.hasNext())
@@ -221,14 +237,13 @@ public class Game {
         }
     }
 
-    public boolean joinPlayer(Player player) {
-        if (isPlayerInGame(player)) return false;
-        
+    public boolean joinPlayer(PlayerData player) {
         switch (state) {
             
             case WAITING:
             case RUNNING:
-                players.put(player.getUniqueId(), new PlayerData(player));
+                if (isPlayerInGame(player.id)) return false;
+                players.put(player.id, player);
                 return true;
             
             default:
@@ -236,65 +251,29 @@ public class Game {
         }
     }
 
-    public boolean isPlayerInGame(Player player) {
-        UUID pUuid = player.getUniqueId();
-
+    public boolean isPlayerInGame(UUID player) {
         switch (state) {
 
             case WAITING:
             case RUNNING:
-                if (players.containsKey(pUuid)) return true;
+                if (players.containsKey(player)) return true;
             default:
                 return false;
         }
     }
 
-    public Stream<Player> getPlayerStream(boolean withSpectators) {
+    public void leavePlayer(UUID player) {
+        // TODO: Leaving
+    }
+
+    public Stream<PlayerData> getPlayerStream(boolean withSpectators) {
         Stream<PlayerData> playerStream = players.values().parallelStream();
-        
-        if (!withSpectators)
-            playerStream = playerStream.filter(p -> !p.isSpectator());
-        
-        return playerStream.map(PlayerData::getPlayer).filter(Objects::nonNull);
+
+        if (withSpectators) return playerStream;
+
+        return playerStream.filter(p -> !p.isSpectator());
     }
 
-    public static class PlayerData {
-        public final UUID id;
-        private Team team;
-        private PlayerState state;
-
-        public PlayerData(Player player) {
-            id = player.getUniqueId();
-        }
-
-        public Player getPlayer() {
-            return Bukkit.getPlayer(id);
-        }
-
-        public boolean isSpectator() {
-            return team == null;
-        }
-
-        public void setTeam(Team team) {
-            this.team = team;
-        }
-
-        public Team getTeam() {
-            return team;
-        }
-
-        public PlayerState getState() {
-            return state;
-        }
-
-        public void setState(PlayerState state) {
-            this.state = state;
-        }
-
-        public static enum PlayerState {
-            SPECTATING, ALIVE, RESPAWNING, DISCONNECTED, DEAD
-        }
-    }
 
     public static enum State {
         STOPPED,
