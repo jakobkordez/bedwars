@@ -5,8 +5,8 @@ import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.Team;
 import cc.jkob.bedwars.game.Game.State;
-import net.md_5.bungee.api.ChatColor;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -45,7 +45,7 @@ public final class BlockListener extends BaseListener {
         if (game.isPlacedBlock(block.getLocation())) {
             event.setCancelled(false);
             game.getPlacedBlocks().remove(block.getLocation());
-        }
+        } else event.getPlayer().sendMessage(ChatColor.RED + "You can only break placed blocks");
     }
 
     @EventHandler(ignoreCancelled = true)

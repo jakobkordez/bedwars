@@ -160,10 +160,6 @@ public class Game {
             if (team.getPlayerCount() == 0)
                 team.destroyBed();
 
-        players.values().parallelStream()
-            .filter(p -> p.getTeam() != null)
-            .forEach(p -> p.setState(PlayerState.ALIVE));
-
         // Start game cycle
         gameCycle.triggerNext();
 
@@ -239,13 +235,13 @@ public class Game {
 
     public boolean joinPlayer(PlayerData player) {
         switch (state) {
-            
+
             case WAITING:
             case RUNNING:
                 if (isPlayerInGame(player.id)) return false;
                 players.put(player.id, player);
                 return true;
-            
+
             default:
                 return false;
         }
@@ -257,13 +253,14 @@ public class Game {
             case WAITING:
             case RUNNING:
                 if (players.containsKey(player)) return true;
+
             default:
                 return false;
         }
     }
 
     public void leavePlayer(UUID player) {
-        // TODO: Leaving
+        players.remove(player);
     }
 
     public Stream<PlayerData> getPlayerStream(boolean withSpectators) {

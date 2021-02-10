@@ -2,7 +2,7 @@ name: ${artifactId}
 main: ${groupId}.${artifactId}
 version: ${version}
 
-depend: [ProtocolLib]
+depend: [HolographicDisplays, MultiWorld, ProtocolLib]
 
 commands:
   bw:

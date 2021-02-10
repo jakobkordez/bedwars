@@ -3,14 +3,14 @@ package cc.jkob.bedwars.listener;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,7 +23,6 @@ import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Game.State;
-import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.LangUtil;
@@ -35,40 +34,33 @@ public class PlayerListener extends BaseListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onDamage(EntityDamageByBlockEvent event) {
+    public void onDamage(EntityDamageEvent event) {
+        System.out.println(event.getEventName() + " " + event.hashCode() + " " + event.getCause());
+
         if (event.getEntityType() != EntityType.PLAYER) return;
+
         Player player = (Player) event.getEntity();
-        
-        Game game = GameManager.instance.getGameByPlayer(player);
+        PlayerData playerD = GameManager.instance.getPlayer(player);
+
+        Game game = playerD.getGame();
         if (game == null) return;
 
-        if (game.getState() == State.STOPPED) return;
-
-        event.setCancelled(true);
-
-        PlayerData playerData = game.getPlayer(player);
-
-        if (playerData.getState() == PlayerState.ALIVE) {
-            playerData.setState(PlayerState.RESPAWNING);
+        if (game.getState() != State.RUNNING) {
+            event.setCancelled(true);
             return;
         }
 
-        if (playerData.isSpectator()) {
-            playerData.setState(PlayerState.SPECTATING);
+        if (event instanceof EntityDamageByEntityEvent) {
+            Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+            if (damager instanceof Player)
+                playerD.onDamage(GameManager.instance.getPlayer((Player) damager));
+        }
+
+        if (player.getHealth() - event.getDamage() < 1) {
+            event.setCancelled(true);
+            playerD.onDeath();
             return;
         }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onDamage(EntityDamageByEntityEvent event) {
-        System.out.println(event.toString());
-        // TODO: Implement
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onDeath(EntityDeathEvent event) {
-        System.out.println(event.toString());
-        // TODO: Implement
     }
 
     @EventHandler(ignoreCancelled = true)

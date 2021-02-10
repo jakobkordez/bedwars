@@ -7,10 +7,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.gui.Title;
+import cc.jkob.bedwars.util.PlayerUtil;
 
 public class PlayerData {
     public final UUID id;
@@ -90,10 +93,10 @@ public class PlayerData {
 
         // TODO: Downgrade tools
         
-        Player lastD = lastDamage.getPlayer();
-        if (System.currentTimeMillis() - lastDamageTime < 60000 && lastD != null) {
-            // TODO: Kill message
-        }
+        // Player lastD = lastDamage.getPlayer();
+        // if (System.currentTimeMillis() - lastDamageTime < 60000 && lastD != null) {
+        //     // TODO: Kill message
+        // }
 
         if (team.hasBed())
             setState(PlayerState.RESPAWNING);
@@ -110,6 +113,18 @@ public class PlayerData {
             case DISCONNECTED:
                 break;
             case RESPAWNING:
+                new BukkitRunnable(){
+                    int i = 5;
+                    @Override
+                    public void run() {
+                        sendTitle(new Title("",
+                            ChatColor.YELLOW + "Respawning in " +
+                            ChatColor.RED + i-- +
+                            ChatColor.YELLOW + " seconds",
+                            20));
+                        if (i <= 0) cancel();
+                    }
+                }.runTaskTimer(BedWarsPlugin.getInstance(), 0, 20);
                 new BukkitRunnable(){
                     @Override
                     public void run() {
@@ -144,6 +159,10 @@ public class PlayerData {
         // TODO: Give inventory
     }
 
+    private void sendTitle(Title title) {
+        PlayerUtil.sendTitle(this, title);
+    }
+
     private static void resetPotionEffects(Player player) {
         player.getActivePotionEffects()
             .forEach(e -> player.removePotionEffect(e.getType()));
@@ -151,6 +170,9 @@ public class PlayerData {
 
     private static void clearInventory(Player player) {
         player.getInventory().clear();
+        ItemStack[] armor = player.getEquipment().getArmorContents();
+        for (int i = 0; i < armor.length; ++i) armor[i] = null;
+        player.getEquipment().setArmorContents(armor);
     }
 
     public static enum PlayerState {
