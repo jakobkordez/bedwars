@@ -159,7 +159,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
         item.give(player);
         player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
-        PlayerUtil.playSound(player, Sound.NOTE_PLING, 1f, 1.5f);
+        PlayerUtil.play(player, Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     @Override

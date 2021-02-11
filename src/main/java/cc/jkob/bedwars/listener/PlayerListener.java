@@ -11,11 +11,14 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.event.PlayerUseEntityEvent;
@@ -33,10 +36,18 @@ public class PlayerListener extends BaseListener {
         super(plugin);
     }
 
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        // TODO: Implement
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        // TODO: Implement
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onDamage(EntityDamageEvent event) {
-        System.out.println(event.getEventName() + " " + event.hashCode() + " " + event.getCause());
-
         if (event.getEntityType() != EntityType.PLAYER) return;
 
         Player player = (Player) event.getEntity();
@@ -50,6 +61,12 @@ public class PlayerListener extends BaseListener {
             return;
         }
 
+        if (event.getCause() == DamageCause.VOID) {
+            event.setCancelled(true);
+            playerD.onDeath(DamageCause.VOID);
+            return;
+        }
+
         if (event instanceof EntityDamageByEntityEvent) {
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
             if (damager instanceof Player)
@@ -58,7 +75,7 @@ public class PlayerListener extends BaseListener {
 
         if (player.getHealth() - event.getDamage() < 1) {
             event.setCancelled(true);
-            playerD.onDeath();
+            playerD.onDeath(event.getCause());
             return;
         }
     }

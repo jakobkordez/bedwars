@@ -2,12 +2,12 @@ package cc.jkob.bedwars.game;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.PlayerUtil;
@@ -99,10 +99,6 @@ public class Game {
         return players.get(player.getUniqueId());
     }
 
-    public void broadcastIngame(String ...msgs) {
-        PlayerUtil.sendMessage(getPlayerStream(true), msgs);
-    }
-
     public GameCycle getGameCycle() {
         return gameCycle;
     }
@@ -144,7 +140,7 @@ public class Game {
         // Give scoreboard
         scoreboard = new GameScoreboard(this);
         scoreboard.startTask();
-        getPlayerStream(true).forEach(p -> p.getPlayer().setScoreboard(scoreboard.getBoard()));
+        PlayerUtil.send(getPlayerStream(true), scoreboard);
 
         // Start generators
         generators.forEach(Generator::start);
@@ -163,9 +159,8 @@ public class Game {
         // Start game cycle
         gameCycle.triggerNext();
 
-        players.values().parallelStream()
-            .filter(p -> p.getTeam() != null)
-            .forEach(p -> p.setState(PlayerState.ALIVE));
+        getPlayerStream(false).sequential()
+            .forEach(PlayerData::onStart);
     }
 
     public void end(Team winner) {
@@ -175,7 +170,7 @@ public class Game {
 
         Title title = new Title(ChatColor.GOLD + "Tie", ChatColor.RED + "Game Over", 0, 80, 20);
         if (winner != null) title.setTitle(winner.getColor().getChatColor() + winner.getName() + " wins!");
-        PlayerUtil.sendTitle(getPlayerStream(true), title);
+        PlayerUtil.send(getPlayerStream(true), title);
 
         new BukkitRunnable(){
             public void run() {
@@ -193,7 +188,7 @@ public class Game {
         if (scoreboard != null) {
             scoreboard.stopTask();
             scoreboard = null;
-            getPlayerStream(true).forEach(p -> p.getPlayer().setScoreboard(GameScoreboard.EMPTY));
+            PlayerUtil.clearScoreboard(getPlayerStream(true));
         }
 
         // Stop generators
@@ -207,6 +202,16 @@ public class Game {
         gameCycle.stop();
         gameCycle = null;
 
+        // Leave players
+        players.forEach((k, p) -> p.leaveGame());
+
+        // Reset map
+        placedBlocks.forEach(b -> b.getBlock().setType(Material.AIR));
+        teams.forEach(t -> t.init(this));
+        for (Entity entity : lobby.getWorld().getEntities())
+            if (!(entity instanceof Player))
+                entity.remove();
+        
         players = null;
         placedBlocks = null;
     }

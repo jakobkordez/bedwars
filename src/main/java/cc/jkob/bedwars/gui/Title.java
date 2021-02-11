@@ -28,6 +28,13 @@ public class Title {
         this.stay = stay;
     }
 
+    public Title(String title, int fadeIn, int stay, int fadeOut) {
+        this.title = title;
+        this.fadeIn = fadeIn;
+        this.stay = stay;
+        this.fadeOut = fadeOut;
+    }
+
     public Title(String title, String subTitle, int fadeIn, int stay, int fadeOut) {
         this.title = title;
         this.subTitle = subTitle;

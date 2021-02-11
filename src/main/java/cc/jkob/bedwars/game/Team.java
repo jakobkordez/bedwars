@@ -10,6 +10,7 @@ import org.bukkit.Sound;
 import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.util.BlockUtil;
+import cc.jkob.bedwars.util.ChatUtil;
 import cc.jkob.bedwars.util.PlayerUtil;
 
 public class Team {
@@ -93,8 +94,8 @@ public class Team {
         bedHead.getBlock().setType(Material.AIR);
         bedAlive = false;
 
-        PlayerUtil.playSound(getPlayerStream(), Sound.WITHER_DEATH);
-        PlayerUtil.sendTitle(getPlayerStream(), new Title(
+        PlayerUtil.play(getPlayerStream(), Sound.WITHER_DEATH);
+        PlayerUtil.send(getPlayerStream(), new Title(
             "" + ChatColor.RED + ChatColor.BOLD + "Bed Destroyed",
             "You will no longer respawn", 0, 40, 20));
     }
@@ -104,8 +105,8 @@ public class Team {
 
         destroyBed();
         Stream<PlayerData> other = game.getPlayerStream(true).filter(p -> p.getTeam() != this);
-        PlayerUtil.playSound(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
-        game.broadcastIngame(getFormattedName() + " Bed" + ChatColor.GRAY + " was destroyed by " + player.getFormattedName());
+        PlayerUtil.play(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
+        PlayerUtil.send(game.getPlayerStream(true), ChatUtil.format(getFormattedName() + " Bed", " was destroyed by ", player.getFormattedName()));
         return true;
     }
 

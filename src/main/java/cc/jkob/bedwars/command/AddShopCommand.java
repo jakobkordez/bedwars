@@ -42,5 +42,4 @@ public class AddShopCommand extends AdminCommand {
         player.sendMessage(type.getName() + ChatColor.RESET + ChatColor.GREEN + " added");
         return true;
     }
-    
 }

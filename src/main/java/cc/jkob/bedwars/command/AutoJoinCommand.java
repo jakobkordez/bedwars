@@ -9,27 +9,37 @@ import org.bukkit.entity.Player;
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
+import cc.jkob.bedwars.game.PlayerData;
 
-public class JoinGameCommand extends PlayerCommand {
-    public JoinGameCommand(BedWarsPlugin plugin) {
+public class AutoJoinCommand extends PlayerCommand {
+    public AutoJoinCommand(BedWarsPlugin plugin) {
         super(plugin);
     }
 
     @Override
     public String getName() {
-        return "join";
+        return "aj";
     }
 
     @Override
     public String[] getArgs() {
-        return new String[]{"game"};
+        return new String[]{};
     }
 
     @Override
     public boolean execute(Player player, List<String> args) throws CommandException {
-        Game game = findGame(args.get(0));
+        PlayerData playerD = GameManager.instance.getPlayer(player);
 
-        if (!GameManager.instance.getPlayer(player).joinGame(game))
+        if (playerD.rejoin()) {
+            player.sendMessage(ChatColor.GREEN + "Rejoined " + playerD.getGame().getName());
+            return true;
+        }
+
+        Game game = GameManager.instance.autoGetWaiting();
+        if (game == null)
+            throw new CommandException("Cannot autojoin any game");
+
+        if (!playerD.joinGame(game))
             throw new CommandException("Failed to join " + game.getName());
 
         player.sendMessage(ChatColor.GREEN + "Joined " + game.getName());

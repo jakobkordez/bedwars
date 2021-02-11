@@ -37,5 +37,4 @@ public class StopGameCommand extends AdminCommand {
         player.sendMessage(ChatColor.GREEN + "Game stopped");
         return true;
     }
-    
 }

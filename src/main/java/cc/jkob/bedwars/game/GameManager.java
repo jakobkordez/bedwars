@@ -1,9 +1,12 @@
 package cc.jkob.bedwars.game;
 
+import cc.jkob.bedwars.game.Game.State;
 import cc.jkob.bedwars.util.FileUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -33,7 +36,7 @@ public class GameManager {
     }
 
     public PlayerData getPlayer(UUID id) {
-        PlayerData player = players.getOrDefault(id, null);
+        PlayerData player = players.get(id);
         if (player != null) return player;
 
         player = new PlayerData(id);
@@ -41,16 +44,23 @@ public class GameManager {
         return player;
     }
 
+    // Get Game //
+    public Game autoGetWaiting() {
+        List<Game> gameList = games.values().parallelStream()
+            .filter(g -> g.getState() == State.WAITING || g.getState() == State.RUNNING)
+            .collect(Collectors.toList());
+
+        if (gameList.size() == 1) return gameList.get(0);
+        return null;
+    }
+
     // By Name //
     public Game getGameByName(String name) {
         Game game = games.get(name);
         if (game != null) return game;
 
-        // Game[] gameArr = (Game[]) games.values().parallelStream()
-        //     .filter(g -> g.getName().toLowerCase().startsWith(name.toLowerCase()))
-        //     .toArray();
+        // TODO: Autocomplete
 
-        // if (gameArr.length == 1) return gameArr[0];
         return null;
     }
 
