@@ -43,10 +43,15 @@ public class CommonGenerator extends Generator {
         hologramUpdater = new BukkitRunnable(){
             @Override
             public void run() {
-                tierLine.setText(getTierString(tier));
                 timerLine.setText(getTimerString(getTicksTillDrop()));
             }
         }.runTaskTimer(BedWarsPlugin.getInstance(), 0, 10);
+    }
+
+    @Override
+    public void upgrade() {
+        super.upgrade();
+        tierLine.setText(getTierString(++tier));
     }
 
     @Override

@@ -37,7 +37,7 @@ public abstract class Shop implements InventoryGui {
         return "" + currency.color + cost.getAmount() + " " + currency.toString(cost.getAmount() > 1);
     }
 
-    protected static Map<Material, Integer> getWallet(Player player) {
+    public static Map<Material, Integer> getWallet(Player player) {
         Map<Material, Integer> wallet = new HashMap<>();
 
         ItemStack[] inv = player.getInventory().getContents();

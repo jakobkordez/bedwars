@@ -228,13 +228,17 @@ public class Game {
             if (teamIt.hasNext()) cTeam = teamIt.next();
             else break;
 
+        // TODO: Shuffle players
         for (PlayerData player : players.values()) {
-            while (player.getTeam() == null) 
-                if (cTeam.getPlayerCount() < maxPlayers)
+            while (player.getTeam() == null)
+                if (player.isSpectator())
+                    break;
+                else if (cTeam.getPlayerCount() < maxPlayers)
                     player.setTeam(cTeam);
                 else if (teamIt.hasNext())
                     cTeam = teamIt.next();
-                else break;
+                else
+                    player.setSpectator();
         }
     }
 
@@ -265,6 +269,7 @@ public class Game {
     }
 
     public void leavePlayer(UUID player) {
+        if (state == State.STOPPED) return;
         players.remove(player);
     }
 

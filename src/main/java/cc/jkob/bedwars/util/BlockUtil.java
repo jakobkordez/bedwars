@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Wool;
 
@@ -64,5 +65,13 @@ public class BlockUtil {
         Wool w = new Wool(material);
         w.setColor(color);
         return w.toItemStack(amount);
+    }
+
+    public static ItemStack getColoredArmor(Material part, DyeColor color) {
+        ItemStack armor = new ItemStack(part);
+        LeatherArmorMeta meta = (LeatherArmorMeta) armor.getItemMeta();
+        meta.setColor(color.getFireworkColor());
+        armor.setItemMeta(meta);
+        return armor;
     }
 }
