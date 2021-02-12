@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Event.Result;
@@ -80,15 +81,30 @@ public class PlayerListener extends BaseListener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         if (GameManager.instance.getGameByPlayer(event.getPlayer()) == null) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+
+        if (action == Action.RIGHT_CLICK_BLOCK)
             if (event.getClickedBlock().getType() == Material.BED_BLOCK) {
                 event.setUseInteractedBlock(Result.DENY);
                 event.setUseItemInHand(Result.ALLOW);
+                return;
             }
+
+        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+            if (player.getItemInHand().getType() == Material.FIREBALL) {
+                int amount = player.getItemInHand().getAmount() - 1;
+                if (amount < 1) player.setItemInHand(null);
+                else player.getItemInHand().setAmount(amount);
+
+                player.launchProjectile(Fireball.class);
+                return;
+            }
+        }
     }
 
     @EventHandler

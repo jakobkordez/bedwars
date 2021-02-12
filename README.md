@@ -31,8 +31,8 @@ Supports Spigot 1.8
     - [ ] Potions
     - [ ] Bows
     - [ ] Knockback stick
-    - [ ] TNT (Ignite on place)
-    - [ ] Fireball (Shoot)
+    - [x] TNT (Ignite on place)
+    - [x] Fireball (Shoot)
     - [ ] Quick buy
   - [ ] Upgrades shop
   - [ ] Tracker shop
