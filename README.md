@@ -19,7 +19,7 @@ Supports Spigot 1.8
   - [ ] Splitting
 - [ ] Leave game commnad
 - [ ] Player state
-  - [ ] Disconnecting / Reconnecting
+  - [x] Disconnecting / Reconnecting
 - [ ] Game state
   - [ ] Team elimination
   - [ ] Auto-end

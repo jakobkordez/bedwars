@@ -41,12 +41,18 @@ public class PlayerListener extends BaseListener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        // TODO: Implement
+        event.setJoinMessage(null);
+
+        PlayerData player = GameManager.instance.getPlayer(event.getPlayer());
+        player.onJoin();
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        // TODO: Implement
+        event.setQuitMessage(null);
+
+        PlayerData player = GameManager.instance.getPlayer(event.getPlayer());
+        player.onDisconnect();
     }
 
     @EventHandler(ignoreCancelled = true)

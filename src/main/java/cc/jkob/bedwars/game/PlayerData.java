@@ -2,6 +2,7 @@ package cc.jkob.bedwars.game;
 
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.Game.State;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.util.ChatUtil;
@@ -44,13 +46,30 @@ public class PlayerData {
         gd.game = game;
         if (!game.joinPlayer(this))
             return false;
-        lobby();
+        if (game.getState() == State.WAITING) lobby();
+        else if (game.getState() == State.RUNNING) {
+            setSpectator();
+            setState(PlayerState.SPECTATING);
+        }
         return true;
     }
 
     public boolean rejoin() {
-        // TODO: Rejoin game
-        return false;
+        if (gd.game == null) return false;
+        if (gd.game.getState() != State.RUNNING) {
+            leaveGame();
+            return false;
+        }
+
+        if (isSpectator())
+            setState(PlayerState.SPECTATING);
+        else if (gd.team.hasBed()) {
+            setState(PlayerState.RESPAWNING);
+            PlayerUtil.send(gd.game.getPlayerStream(true), ChatUtil.format(getFormattedName(), " rejoined"));
+        }
+        else
+            setState(PlayerState.DEAD);
+        return true;
     }
 
     public void leaveGame() {
@@ -139,6 +158,24 @@ public class PlayerData {
             setState(PlayerState.RESPAWNING);
         else
             setState(PlayerState.DEAD);
+    }
+
+    public void onDisconnect() {
+        if (gd.state == PlayerState.ALIVE)
+            onDeath(DamageCause.CUSTOM);
+        setState(PlayerState.DISCONNECTED);
+        Stream<PlayerData> players;
+        if (gd.game == null)
+            players = GameManager.instance.getLobbyPlayers();
+        else
+            players = gd.game.getPlayerStream(true);
+        PlayerUtil.send(players, ChatUtil.format(getFormattedName(), " disconnected"));
+    }
+
+    public void onJoin() {
+        if (rejoin()) return;
+
+        PlayerUtil.send(GameManager.instance.getLobbyPlayers(), ChatUtil.format(getName(), " joined"));
     }
 
     private void setState(PlayerState state) {

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -31,6 +32,11 @@ public class GameManager {
     }
 
     // Get Player Data //
+    public Stream<PlayerData> getLobbyPlayers() {
+        return players.values().parallelStream()
+            .filter(p -> p.getGame() == null);
+    }
+
     public PlayerData getPlayer(Player player) {
         return getPlayer(player.getUniqueId());
     }
