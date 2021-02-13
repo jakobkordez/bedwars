@@ -3,6 +3,7 @@ package cc.jkob.bedwars.listener;
 import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
@@ -12,6 +13,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -83,17 +85,27 @@ public class PlayerListener extends BaseListener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (GameManager.instance.getGameByPlayer(event.getPlayer()) == null) return;
+        Game game = GameManager.instance.getGameByPlayer(event.getPlayer());
+        if (game == null) return;
 
         Player player = event.getPlayer();
         Action action = event.getAction();
 
-        if (action == Action.RIGHT_CLICK_BLOCK)
+        if (action == Action.RIGHT_CLICK_BLOCK) {
             if (event.getClickedBlock().getType() == Material.BED_BLOCK) {
                 event.setUseInteractedBlock(Result.DENY);
                 event.setUseItemInHand(Result.ALLOW);
-                return;
             }
+
+            if (player.getItemInHand().getType() == Material.WATER_BUCKET) {
+                Block block = event.getClickedBlock().getRelative(event.getBlockFace());
+                player.setItemInHand(null);
+                block.setType(Material.WATER);
+                game.getPlacedBlocks().add(block.getLocation());
+            }
+
+            return;
+        }
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (player.getItemInHand().getType() == Material.FIREBALL) {
@@ -168,5 +180,11 @@ public class PlayerListener extends BaseListener {
         if (hSplit.length == 1) return;
         int gt = Integer.parseInt(hSplit[0]);
         GuiType.values()[gt].getGui().click(player, hSplit[1], event.getAction());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHunger(FoodLevelChangeEvent event) {
+        if (GameManager.instance.getGameByWorld(event.getEntity()) != null)
+            event.setCancelled(true);
     }
 }

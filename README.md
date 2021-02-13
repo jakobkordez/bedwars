@@ -27,7 +27,7 @@ Supports Spigot 1.8
   - [ ] Fix shopkeepers despawning
   - [ ] Variable prices
   - [ ] Item shop
-    - [ ] Water (remove bucket)
+    - [x] Water (remove bucket)
     - [ ] Potions
     - [ ] Bows
     - [ ] Knockback stick

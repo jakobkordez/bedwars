@@ -72,7 +72,6 @@ public class Game {
     }
 
     // transient
-    private transient UUID instanceId;
     private transient State state;
     private transient Map<UUID, PlayerData> players;
     private transient GameScoreboard scoreboard;
@@ -85,10 +84,6 @@ public class Game {
 
     public State getState() {
         return state;
-    }
-
-    public UUID getInstanceId() {
-        return instanceId;
     }
 
     public Map<UUID, PlayerData> getPlayers() {
@@ -115,7 +110,6 @@ public class Game {
         if (state != State.STOPPED) return;
 
         state = State.WAITING;
-        instanceId = UUID.randomUUID();
 
         teams.forEach(t -> t.init(this));
         
