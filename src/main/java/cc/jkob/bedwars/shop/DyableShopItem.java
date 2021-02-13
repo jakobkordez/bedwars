@@ -13,13 +13,13 @@ public class DyableShopItem extends ShopItem {
 
     private Material material;
 
-    public DyableShopItem(String name, ItemStack item, ItemStack price) {
-        super(name, item, price);
+    public DyableShopItem(int id, String name, ItemStack item, ItemStack price) {
+        super(id, name, item, price);
         material = item.getType();
     }
 
-    public DyableShopItem(String name, ItemStack item, ItemStack price, Material material) {
-        super(name, item, price);
+    public DyableShopItem(int id, String name, ItemStack item, ItemStack price, Material material) {
+        super(id, name, item, price);
         this.material = material;
     }
 
@@ -44,12 +44,14 @@ public class DyableShopItem extends ShopItem {
 
         if (material == null)
             return new DyableShopItem(
-                String.valueOf(args.get("name")),
+                (int) args.get("id"),
+                (String) args.get("name"),
                 (ItemStack) args.get("item"),
                 (ItemStack) args.get("price"));
         
         return new DyableShopItem(
-            String.valueOf(args.get("name")),
+            (int) args.get("id"),
+            (String) args.get("name"),
             (ItemStack) args.get("item"),
             (ItemStack) args.get("price"),
             material

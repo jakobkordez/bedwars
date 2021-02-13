@@ -81,9 +81,9 @@ public class PlayerInventory {
     private static enum Pickaxe {
         NONE,
         LEVEL_1(Material.WOOD_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 1)),
-        LEVEL_2(Material.STONE_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 1)),
-        LEVEL_3(Material.GOLD_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 2)),
-        LEVEL_4(Material.DIAMOND_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 3));
+        LEVEL_2(Material.IRON_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 2)),
+        LEVEL_3(Material.GOLD_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 3)),
+        LEVEL_4(Material.DIAMOND_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 4));
 
         public final ItemStack item;
 

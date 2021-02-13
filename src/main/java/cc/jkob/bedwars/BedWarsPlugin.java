@@ -6,6 +6,7 @@ import cc.jkob.bedwars.listener.PlayerListener;
 import cc.jkob.bedwars.listener.WorldListener;
 import cc.jkob.bedwars.shop.DyableShopItem;
 import cc.jkob.bedwars.shop.ItemShop;
+import cc.jkob.bedwars.shop.PotionItem;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.shop.ShopCategory;
 import cc.jkob.bedwars.shop.ShopItem;
@@ -28,6 +29,7 @@ public class BedWarsPlugin extends JavaPlugin {
 
         ConfigurationSerialization.registerClass(ShopItem.class);
         ConfigurationSerialization.registerClass(DyableShopItem.class);
+        ConfigurationSerialization.registerClass(PotionItem.class);
         ConfigurationSerialization.registerClass(ShopCategory.class);
         ConfigurationSerialization.registerClass(ItemShop.class);
 

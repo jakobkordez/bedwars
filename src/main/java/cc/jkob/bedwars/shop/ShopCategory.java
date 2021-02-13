@@ -43,7 +43,7 @@ public class ShopCategory implements ConfigurationSerializable {
     @SuppressWarnings("unchecked")
     public static ShopCategory deserialize(Map<String, Object> args) {
         ShopCategory cat = new ShopCategory(
-            String.valueOf(args.get("name")),
+            (String) args.get("name"),
             (ItemStack) args.get("icon"));
         
         for (Object item : (List<Object>) args.get("items"))

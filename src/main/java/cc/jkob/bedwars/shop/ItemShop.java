@@ -32,7 +32,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
     private static final int ROWS = 6;
     private static final GuiType GUI_TYPE = GuiType.GAME_ITEM_SHOP;
 
-    private List<ShopItem> items = new ArrayList<>();
+    private Map<Integer, ShopItem> items = new HashMap<>();
     private List<ShopCategory> categories = new ArrayList<>();
 
     public List<ShopCategory> getCategories() {
@@ -71,8 +71,10 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         if (cIndex > 0 && cIndex <= categories.size()) {
             catTitle = categories.get(cIndex - 1).getName();
             i = 0;
-            for (int itemInd : categories.get(cIndex - 1).getItems()) {
-                invStacks[19 + i + 2 * (i / 7)] = createStack(itemInd, wallet);
+            for (int itemId : categories.get(cIndex - 1).getItems()) {
+                ShopItem item = items.get(itemId);
+                if (item == null) continue;
+                invStacks[19 + i + 2 * (i / 7)] = item.getShopSlot(GUI_TYPE, wallet);
                 ++i;
             }
         } else {
@@ -101,30 +103,9 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + name);
-        meta.setLore(Lists.newArrayList(
-            LangUtil.hideString(GUI_TYPE.ordinal() + ";" + TileType.CATEGORY.ordinal() + ";" + catId)
-        ));
+        meta.setLore(Lists.newArrayList(getTileData(TileType.CATEGORY, catId)));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         
-        stack.setItemMeta(meta);
-        return stack;
-    }
-
-    private ItemStack createStack(int itemId, Map<Material, Integer> wallet) {
-        ShopItem item = items.get(itemId);
-        ItemStack price = item.getPrice();
-
-        ItemStack stack = new ItemStack(item.getItem());
-
-        ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName((wallet.getOrDefault(price.getType(), 0) < price.getAmount() ? ChatColor.RED : ChatColor.GREEN) + item.getName());
-        meta.setLore(Lists.newArrayList(
-            ChatColor.GRAY + "Cost: " + formatCost(price),
-            LangUtil.hideString(GUI_TYPE.ordinal() + ";" + TileType.BUY.ordinal() + ";" + itemId)
-        ));
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
         stack.setItemMeta(meta);
         return stack;
     }
@@ -181,10 +162,14 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         }
     }
 
+    static String getTileData(TileType type, int id) {
+        return LangUtil.hideString(GUI_TYPE.ordinal() + ";" + type.ordinal() + ";" + id);
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> data = new HashMap<>();
-        data.put("items", items);
+        data.put("items", items.values());
         data.put("categories", categories);
         return data;
     }
@@ -194,7 +179,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         ItemShop shop = new ItemShop();
 
         for (Object item : (List<Object>) args.get("items"))
-            shop.items.add((ShopItem) item);
+            shop.items.put(((ShopItem) item).id, (ShopItem) item);
 
         for (Object cat : (List<Object>) args.get("categories"))
             shop.categories.add((ShopCategory) cat);
@@ -202,7 +187,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         return shop;
     }
 
-    private enum TileType {
+    static enum TileType {
         CATEGORY,
         BUY
     }
