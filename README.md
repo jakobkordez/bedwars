@@ -29,8 +29,8 @@ Supports Spigot 1.8
   - [ ] Item shop
     - [x] Water (remove bucket)
     - [ ] Potions
-    - [ ] Bows
-    - [ ] Knockback stick
+    - [x] Bows
+    - [x] Knockback stick
     - [x] TNT (Ignite on place)
     - [x] Fireball (Shoot)
     - [ ] Quick buy

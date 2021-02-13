@@ -217,6 +217,7 @@ public class PlayerData {
         // Gamemode
         player.setGameMode(GameMode.SURVIVAL);
         player.setHealth(player.getMaxHealth());
+        player.setFoodLevel(20);
         
         // Potion effects
         player.getActivePotionEffects()

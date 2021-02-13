@@ -123,6 +123,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
             LangUtil.hideString(GUI_TYPE.ordinal() + ";" + TileType.BUY.ordinal() + ";" + itemId)
         ));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
         stack.setItemMeta(meta);
         return stack;
