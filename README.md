@@ -21,8 +21,8 @@ Supports Spigot 1.8
 - [ ] Player state
   - [x] Disconnecting / Reconnecting
 - [ ] Game state
-  - [ ] Team elimination
-  - [ ] Auto-end
+  - [x] Team elimination
+  - [x] Auto-end
 - [ ] Shop
   - [ ] Fix shopkeepers despawning
   - [ ] Variable prices

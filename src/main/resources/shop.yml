@@ -134,7 +134,7 @@ item_shop:
         meta-type: UNSPECIFIC
         display-name: "\xa7bKnockback Stick"
         enchants:
-          KNOCKBACK: 2
+          KNOCKBACK: 1
     price:
       ==: org.bukkit.inventory.ItemStack
       type: GOLD_INGOT

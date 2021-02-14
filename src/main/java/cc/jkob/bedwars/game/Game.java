@@ -10,6 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
+import cc.jkob.bedwars.util.ChatUtil;
 import cc.jkob.bedwars.util.PlayerUtil;
 import cc.jkob.bedwars.util.SortByPlayers;
 
@@ -20,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Game {
@@ -104,6 +106,15 @@ public class Game {
     
     public boolean isPlacedBlock(Location location) {
         return placedBlocks.parallelStream().anyMatch(l -> l.equals(location));
+    }
+
+    public void onTeamElim(Team team) {
+        PlayerUtil.send(getPlayerStream(true), ChatUtil.format(team.getFormattedName() + " Team", " has been eliminated"));
+        List<Team> aliveT = teams.parallelStream()
+            .filter(t -> t.playersAlive() != 0)
+            .collect(Collectors.toList());
+        if (aliveT.size() == 1) end(aliveT.get(0));
+        else if (aliveT.size() == 0) end(null);
     }
 
     public void init() {

@@ -156,8 +156,11 @@ public class PlayerData {
 
         if (gd.team.hasBed())
             setState(PlayerState.RESPAWNING);
-        else
+        else {
             setState(PlayerState.DEAD);
+            if (gd.team.playersAlive() == 0)
+                gd.game.onTeamElim(gd.team);
+        }
     }
 
     public void onDisconnect() {
