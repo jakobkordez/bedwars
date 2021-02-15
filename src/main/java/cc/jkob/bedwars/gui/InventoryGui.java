@@ -1,9 +1,10 @@
 package cc.jkob.bedwars.gui;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 
+import cc.jkob.bedwars.game.PlayerData;
+
 public interface InventoryGui {
-    public void open(Player player);
-    public void click(Player player, String id, InventoryAction action);
+    public void open(PlayerData player);
+    public void click(PlayerData player, String id, InventoryAction action);
 }

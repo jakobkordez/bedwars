@@ -6,14 +6,32 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
 
+import cc.jkob.bedwars.game.PlayerData;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.gui.InventoryGui;
 import cc.jkob.bedwars.util.FileUtil;
 
 public abstract class Shop implements InventoryGui {
     private static ItemShop itemShop;
     private static UpgradeShop upgradeShop;
+
+    protected abstract void open(GamePlayer player);
+    protected abstract void click(GamePlayer player, String id, InventoryAction action);
+
+    @Override
+    public final void open(PlayerData player) {
+        if (!player.isInGame()) return;
+        open(player.getGamePlayer());
+    }
+
+    @Override
+    public final void click(PlayerData player, String id, InventoryAction action) {
+        if (!player.isInGame()) return;
+        click(player.getGamePlayer(), id, action);
+    }
 
     public static ItemShop getItemShop() {
         if (itemShop != null) return itemShop;

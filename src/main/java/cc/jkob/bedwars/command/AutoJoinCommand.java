@@ -30,8 +30,8 @@ public class AutoJoinCommand extends PlayerCommand {
     public boolean execute(Player player, List<String> args) throws CommandException {
         PlayerData playerD = GameManager.instance.getPlayer(player);
 
-        if (playerD.rejoin()) {
-            player.sendMessage(ChatColor.GREEN + "Rejoined " + playerD.getGame().getName());
+        if (playerD.isInGame() && playerD.getGamePlayer().tryRejoin()) {
+            player.sendMessage(ChatColor.GREEN + "Rejoined " + playerD.getGamePlayer().game.getName());
             return true;
         }
 

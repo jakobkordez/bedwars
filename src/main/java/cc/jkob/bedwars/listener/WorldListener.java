@@ -1,6 +1,7 @@
 package cc.jkob.bedwars.listener;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
@@ -12,7 +13,7 @@ import org.bukkit.event.world.WorldSaveEvent;
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 
 public class WorldListener extends BaseListener {
 
@@ -22,20 +23,18 @@ public class WorldListener extends BaseListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent event) {
-        Game game = GameManager.instance.getGameByWorld(event.getWorld().getName());
+        Game game = GameManager.instance.getGameByWorld(event.getWorld());
         if (game == null) return;
 
-        if (game.getState() == State.STOPPED) return;
+        if (game.getState() == GameState.STOPPED) return;
 
         event.setCancelled(true);
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldSave(WorldSaveEvent event) {
-        Game game = GameManager.instance.getGameByWorld(event.getWorld().getName());
+        Game game = GameManager.instance.getGameByWorld(event.getWorld());
         if (game == null) return;
-
-        if (game.getState() == State.STOPPED) return;
 
         plugin.getLogger().warning("Saving world " + event.getWorld().getName());
     }

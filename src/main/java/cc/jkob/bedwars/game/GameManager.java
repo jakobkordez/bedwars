@@ -1,7 +1,8 @@
 package cc.jkob.bedwars.game;
 
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 import cc.jkob.bedwars.util.FileUtil;
+import cc.jkob.bedwars.util.PlayerUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -19,6 +21,8 @@ public class GameManager {
 
     private final HashMap<UUID, PlayerData> players = new HashMap<>();
     private final HashMap<String, Game> games = new HashMap<>();
+
+    public final Location lobby = new Location(Bukkit.getWorld("lobby"), 0.5, 69, 0.5);
 
     private GameManager() {
         for (Game game : FileUtil.loadGames()) {
@@ -31,10 +35,14 @@ public class GameManager {
         games.put(game.getName(), game);
     }
 
+    public void broadcastLobby(String msg) {
+        PlayerUtil.send(getLobbyPlayers(), msg);
+    }
+
     // Get Player Data //
-    public Stream<PlayerData> getLobbyPlayers() {
+    private Stream<PlayerData> getLobbyPlayers() {
         return players.values().parallelStream()
-            .filter(p -> p.getGame() == null);
+            .filter(p -> !p.isInGame());
     }
 
     public PlayerData getPlayer(Player player) {
@@ -53,7 +61,7 @@ public class GameManager {
     // Get Game //
     public Game autoGetWaiting() {
         List<Game> gameList = games.values().parallelStream()
-            .filter(g -> g.getState() == State.WAITING || g.getState() == State.RUNNING)
+            .filter(g -> g.getState() == GameState.WAITING || g.getState() == GameState.RUNNING)
             .collect(Collectors.toList());
 
         if (gameList.size() == 1) return gameList.get(0);
@@ -95,6 +103,8 @@ public class GameManager {
     }
 
     public Game getGameByPlayer(UUID player) {
-        return getPlayer(player).getGame();
+        PlayerData playerD = getPlayer(player);
+        if (!playerD.isInGame()) return null;
+        return playerD.getGamePlayer().game;
     }
 }

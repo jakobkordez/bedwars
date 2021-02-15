@@ -18,17 +18,20 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.event.PlayerUseEntityEvent;
 import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.PlayerData;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.LangUtil;
@@ -43,8 +46,8 @@ public class PlayerListener extends BaseListener {
     public void onJoin(PlayerJoinEvent event) {
         event.setJoinMessage(null);
 
-        PlayerData player = GameManager.instance.getPlayer(event.getPlayer());
-        player.onJoin();
+        Player player = event.getPlayer();
+        GameManager.instance.getPlayer(player).onJoin(player);
     }
 
     @EventHandler
@@ -59,32 +62,31 @@ public class PlayerListener extends BaseListener {
     public void onDamage(EntityDamageEvent event) {
         if (event.getEntityType() != EntityType.PLAYER) return;
 
-        Player player = (Player) event.getEntity();
-        PlayerData playerD = GameManager.instance.getPlayer(player);
+        PlayerData player = GameManager.instance.getPlayer(event.getEntity().getUniqueId());
 
-        Game game = playerD.getGame();
-        if (game == null) return;
-
-        if (game.getState() != State.RUNNING) {
+        if (!player.isInGame()) return;
+        
+        Game game = player.getGamePlayer().game;
+        if (game.getState() != GameState.RUNNING) {
             event.setCancelled(true);
             return;
         }
 
         if (event.getCause() == DamageCause.VOID) {
             event.setCancelled(true);
-            playerD.onDeath(DamageCause.VOID);
+            player.onDeath(DamageCause.VOID);
             return;
         }
 
         if (event instanceof EntityDamageByEntityEvent) {
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
             if (damager instanceof Player)
-                playerD.onDamage(GameManager.instance.getPlayer((Player) damager));
+                player.onDamage(GameManager.instance.getPlayer(damager.getUniqueId()));
         }
 
-        if (player.getHealth() - event.getDamage() < 1) {
+        if (player.getPlayer().getHealth() - event.getDamage() < 1) {
             event.setCancelled(true);
-            playerD.onDeath(event.getCause());
+            player.onDeath(event.getCause());
             return;
         }
     }
@@ -127,21 +129,28 @@ public class PlayerListener extends BaseListener {
 
     @EventHandler
     public void onUseEntity(PlayerUseEntityEvent event) {
-        Player player = event.getPlayer();
+        PlayerData player = GameManager.instance.getPlayer(event.getPlayer());
 
-        Game game = GameManager.instance.getGameByPlayer(player);
-        if (game == null) return;
+        if (!player.isInGame()) return;
 
-        if (game.getState() != State.RUNNING) return;
+        Game game = player.getGamePlayer().game;
+        if (game.getState() != GameState.RUNNING) return;
 
         Shopkeeper shopkeeper = game.getShopkeepers().parallelStream()
             .filter(s -> s.geteId() == event.getEntityId())
             .findAny().orElse(null);
         if (shopkeeper == null) return;
 
-        if (!game.getPlayers().containsKey(player.getUniqueId())) return;
-
         shopkeeper.getShopType().getShop().open(player);
+    }
+
+    @EventHandler
+    public void onItemDrop(PlayerDropItemEvent event) {
+        if (GameManager.instance.getGameByPlayer(event.getPlayer()) == null) return;
+
+        ItemMeta meta = event.getItemDrop().getItemStack().getItemMeta();
+        if (meta.spigot().isUnbreakable())
+            event.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -161,15 +170,20 @@ public class PlayerListener extends BaseListener {
         Game game = GameManager.instance.getGameByPlayer(player);
         if (game == null) return;
 
-        if (game.getState() == State.STOPPED) return;
+        if (game.getState() == GameState.STOPPED) return;
 
         event.setCancelled(true);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();
-        if (GameManager.instance.getGameByPlayer(player) == null) return;
+        PlayerData player = GameManager.instance.getPlayer(event.getWhoClicked().getUniqueId());
+        if (!player.isInGame()) return;
+
+        if (event.getSlotType() == SlotType.ARMOR) {
+            event.setCancelled(true);
+            return;
+        }
 
         if (event.getInventory().getName().startsWith("container.")) return;
 

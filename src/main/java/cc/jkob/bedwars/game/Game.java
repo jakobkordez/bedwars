@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.ChatUtil;
@@ -74,26 +75,26 @@ public class Game {
     }
 
     // transient
-    private transient State state;
-    private transient Map<UUID, PlayerData> players;
+    private transient GameState state;
+    private transient Map<UUID, GamePlayer> players;
     private transient GameScoreboard scoreboard;
     private transient GameCycle gameCycle;
     private transient List<Location> placedBlocks;
 
     public void initTransient() {
-        state = State.STOPPED;
+        state = GameState.STOPPED;
     }
 
-    public State getState() {
+    public GameState getState() {
         return state;
     }
 
-    public Map<UUID, PlayerData> getPlayers() {
+    public Map<UUID, GamePlayer> getPlayers() {
         return players;
     }
 
-    public PlayerData getPlayer(Player player) {
-        return players.get(player.getUniqueId());
+    public GameScoreboard getScoreboard() {
+        return scoreboard;
     }
 
     public GameCycle getGameCycle() {
@@ -108,8 +109,12 @@ public class Game {
         return placedBlocks.parallelStream().anyMatch(l -> l.equals(location));
     }
 
+    public void broadcast(String msg) {
+        PlayerUtil.send(getPlayersD(), msg);
+    }
+
     public void onTeamElim(Team team) {
-        PlayerUtil.send(getPlayerStream(true), ChatUtil.format(team.getFormattedName() + " Team", " has been eliminated"));
+        broadcast(ChatUtil.format(team.getFormattedName() + " Team", " has been eliminated"));
         List<Team> aliveT = teams.parallelStream()
             .filter(t -> t.playersAlive() != 0)
             .collect(Collectors.toList());
@@ -118,9 +123,9 @@ public class Game {
     }
 
     public void init() {
-        if (state != State.STOPPED) return;
+        if (state != GameState.STOPPED) return;
 
-        state = State.WAITING;
+        state = GameState.WAITING;
 
         teams.forEach(t -> t.init(this));
         
@@ -136,16 +141,15 @@ public class Game {
     }
 
     public void start() {
-        if (state != State.WAITING) return;
+        if (state != GameState.WAITING) return;
 
-        state = State.RUNNING;
+        state = GameState.RUNNING;
         
         autoAssignTeams();
 
-        // Give scoreboard
+        // Scoreboard
         scoreboard = new GameScoreboard(this);
         scoreboard.startTask();
-        PlayerUtil.send(getPlayerStream(true), scoreboard);
 
         // Start generators
         generators.forEach(Generator::start);
@@ -164,18 +168,18 @@ public class Game {
         // Start game cycle
         gameCycle.triggerNext();
 
-        getPlayerStream(false).sequential()
-            .forEach(PlayerData::onStart);
+        getPlayerStream().sequential()
+            .forEach(GamePlayer::onStart);
     }
 
     public void end(Team winner) {
-        if (state != State.RUNNING) return;
+        if (state != GameState.RUNNING) return;
 
-        state = State.ENDED;
+        state = GameState.ENDED;
 
         Title title = new Title(ChatColor.GOLD + "Tie", ChatColor.RED + "Game Over", 0, 80, 20);
         if (winner != null) title.setTitle(winner.getColor().getChatColor() + winner.getName() + " wins!");
-        PlayerUtil.send(getPlayerStream(true), title);
+        PlayerUtil.send(getPlayersD(), title);
 
         new BukkitRunnable(){
             public void run() {
@@ -185,15 +189,17 @@ public class Game {
     }
 
     public void stop() {
-        if (state == State.STOPPED) return;
+        if (state == GameState.STOPPED) return;
 
-        state = State.STOPPED;
+        state = GameState.STOPPED;
+
+        // Leave players
+        players.forEach((k, p) -> p.leaveGame());
 
         // Remove scoreboard
         if (scoreboard != null) {
             scoreboard.stopTask();
             scoreboard = null;
-            PlayerUtil.clearScoreboard(getPlayerStream(true));
         }
 
         // Stop generators
@@ -207,16 +213,13 @@ public class Game {
         gameCycle.stop();
         gameCycle = null;
 
-        // Leave players
-        players.forEach((k, p) -> p.leaveGame());
-
         // Reset map
         placedBlocks.forEach(b -> b.getBlock().setType(Material.AIR));
         teams.forEach(t -> t.init(this));
         for (Entity entity : lobby.getWorld().getEntities())
             if (!(entity instanceof Player))
                 entity.remove();
-        
+
         players = null;
         placedBlocks = null;
     }
@@ -234,7 +237,7 @@ public class Game {
             else break;
 
         // TODO: Shuffle players
-        for (PlayerData player : players.values()) {
+        for (GamePlayer player : players.values()) {
             while (player.getTeam() == null)
                 if (player.isSpectator())
                     break;
@@ -247,47 +250,34 @@ public class Game {
         }
     }
 
-    public boolean joinPlayer(PlayerData player) {
+    public void joinPlayer(GamePlayer player) {
         switch (state) {
-
+            case STOPPED:
+                init();
             case WAITING:
             case RUNNING:
-                if (isPlayerInGame(player.id)) return false;
-                players.put(player.id, player);
-                return true;
-
+                players.put(player.player.id, player);
+                break;
             default:
-                return false;
-        }
-    }
-
-    public boolean isPlayerInGame(UUID player) {
-        switch (state) {
-
-            case WAITING:
-            case RUNNING:
-                if (players.containsKey(player)) return true;
-
-            default:
-                return false;
+                break;
         }
     }
 
     public void leavePlayer(UUID player) {
-        if (state == State.STOPPED) return;
+        if (state == GameState.STOPPED) return;
         players.remove(player);
     }
 
-    public Stream<PlayerData> getPlayerStream(boolean withSpectators) {
-        Stream<PlayerData> playerStream = players.values().parallelStream();
+    public Stream<GamePlayer> getPlayerStream() {
+        return players.values().parallelStream();
+    }
 
-        if (withSpectators) return playerStream;
-
-        return playerStream.filter(p -> !p.isSpectator());
+    private Stream<PlayerData> getPlayersD() {
+        return getPlayerStream().map(p -> p.player);
     }
 
 
-    public static enum State {
+    public static enum GameState {
         STOPPED,
         WAITING,
         RUNNING,

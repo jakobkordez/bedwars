@@ -2,19 +2,24 @@ package cc.jkob.bedwars.shop;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import cc.jkob.bedwars.game.PlayerData;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.shop.ItemShop.TileType;
+import cc.jkob.bedwars.shop.Shop.Currency;
+import cc.jkob.bedwars.util.PlayerUtil;
 
 public class ShopItem implements ConfigurationSerializable {
 
@@ -42,17 +47,49 @@ public class ShopItem implements ConfigurationSerializable {
         return price;
     }
 
-    public boolean canBuy(PlayerData player) {
+    public boolean canBuy(GamePlayer player) {
         return true;
     }
 
-    public void give(PlayerData player) {
+    public void tryBuy(GamePlayer player) {
+        Inventory inv = player.player.getPlayer().getInventory();
+
+        if (!inv.contains(price.getType(), price.getAmount())) {
+            player.player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
+            return;
+        }
+
+        Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
+        int sum = price.getAmount();
+        for (Entry<Integer, ? extends ItemStack> stack : cMap.entrySet())
+            if (sum <= 0) break;
+            else {
+                int old = stack.getValue().getAmount();
+                int sub = Integer.min(sum, old);
+                if (old > sub)
+                    stack.getValue().setAmount(old - sub);
+                else
+                    inv.clear(stack.getKey());
+                sum -= sub;
+            }
+
+        if (!canBuy(player)) {
+            player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
+            return;
+        }
+
+        give(player);
+        player.player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + name);
+        PlayerUtil.play(player.player, Sound.NOTE_PLING, 1f, 1.5f);
+    }
+
+    public void give(GamePlayer player) {
         ItemStack item = this.item.clone();
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.WHITE + name);
         item.setItemMeta(meta);
 
-        player.getPlayer().getInventory().addItem(item);
+        player.player.getPlayer().getInventory().addItem(item);
     }
 
     public ItemStack getShopSlot(GuiType guiType, Map<Material, Integer> wallet) {

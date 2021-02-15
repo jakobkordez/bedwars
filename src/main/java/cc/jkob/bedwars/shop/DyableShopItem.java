@@ -5,8 +5,8 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Team;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.util.BlockUtil;
 
 public class DyableShopItem extends ShopItem {
@@ -24,11 +24,11 @@ public class DyableShopItem extends ShopItem {
     }
 
     @Override
-    public void give(PlayerData player) {
+    public void give(GamePlayer player) {
         Team team = player.getTeam();
         ItemStack it = BlockUtil.getColoredStack(material, team.getColor().getDyeColor(), item.getAmount());
         it.setItemMeta(item.getItemMeta());
-        player.getPlayer().getInventory().addItem(it);
+        player.player.getPlayer().getInventory().addItem(it);
     }
 
     @Override

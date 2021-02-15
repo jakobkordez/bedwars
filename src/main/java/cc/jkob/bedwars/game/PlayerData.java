@@ -2,9 +2,7 @@ package cc.jkob.bedwars.game;
 
 import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -17,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.util.ChatUtil;
@@ -26,11 +24,16 @@ import cc.jkob.bedwars.util.PlayerUtil;
 public class PlayerData {
     public final UUID id;
     public String name;
-    private GamePlayer gd = new GamePlayer(null);
+    private GamePlayer gd;
+    private Player player;
 
     public PlayerData(UUID id) {
         this.id = id;
         getName();
+    }
+
+    public boolean isInGame() {
+        return gd != null;
     }
 
     public String getName() {
@@ -41,224 +44,76 @@ public class PlayerData {
         return name = player.getDisplayName();
     }
 
+    public void tpMainLobby() {
+        Player player = getPlayer();
+        if (player != null)
+        resetPlayer(player);
+        player.teleport(GameManager.instance.lobby);
+    }
+
     public boolean joinGame(Game game) {
-        leaveGame();
-        gd.game = game;
-        if (!game.joinPlayer(this))
-            return false;
-        if (game.getState() == State.WAITING) lobby();
-        else if (game.getState() == State.RUNNING) {
-            setSpectator();
-            setState(PlayerState.SPECTATING);
+        if (isInGame()) gd.leaveGame();
+        switch (game.getState()) {
+            case RUNNING:
+                gd = new GamePlayer(this, game);
+                game.joinPlayer(gd);
+                gd.setSpectator();
+                gd.spectateMode(PlayerState.SPECTATING);
+                break;
+            case WAITING:
+                gd = new GamePlayer(this, game);
+                game.joinPlayer(gd);
+                gd.toLobby();
+                break;
+            default:
+                break;
         }
-        return true;
+        return gd != null;
     }
 
-    public boolean rejoin() {
-        if (gd.game == null) return false;
-        if (gd.game.getState() != State.RUNNING) {
-            leaveGame();
-            return false;
-        }
-
-        if (isSpectator())
-            setState(PlayerState.SPECTATING);
-        else if (gd.team.hasBed()) {
-            setState(PlayerState.RESPAWNING);
-            PlayerUtil.send(gd.game.getPlayerStream(true), ChatUtil.format(getFormattedName(), " rejoined"));
-        }
-        else
-            setState(PlayerState.DEAD);
-        return true;
-    }
-
-    public void leaveGame() {
-        if (gd.game == null) return;
-        gd.game.leavePlayer(id);
-        gd = new GamePlayer(null);
-        // TODO: TP out
-    }
-
-    public Game getGame() {
-        return gd.game;
-    }
-
-    public String getFormattedName() {
-        if (gd.team == null) return ChatColor.GRAY + getName();
-
-        return gd.team.getColor().getChatColor() + getName();
+    public GamePlayer getGamePlayer() {
+        return gd;
     }
 
     public Player getPlayer() {
-        return Bukkit.getPlayer(id);
-    }
-
-    public boolean isSpectator() {
-        return gd.spectator;
-    }
-
-    public void setSpectator() {
-        gd.spectator = true;
-        gd.team = null;
-    }
-
-    public void setTeam(Team team) {
-        gd.spectator = false;
-        gd.team = team;
-    }
-
-    public Team getTeam() {
-        return gd.team;
-    }
-
-    public PlayerState getState() {
-        return gd.state;
-    }
-
-    public void onStart() {
-        if (isSpectator()) {
-            setState(PlayerState.SPECTATING);
-            return;
-        }
-        gd.inventory = new PlayerInventory(gd.team.getColor());
-        setState(PlayerState.ALIVE);
+        return player;
     }
 
     public void onDamage(PlayerData damager) {
-        gd.lastDamage = damager;
-        gd.lastDamageTime = System.currentTimeMillis();
+        if (isInGame()) {
+            gd.onDamage(damager.gd);
+            return;
+        }
     }
 
     public void onDeath(DamageCause cause) {
-        if (isSpectator()) {
-            setState(PlayerState.SPECTATING);
+        if (isInGame()) {
+            gd.onDeath(cause);
             return;
         }
 
-        gd.inventory.downgradeTools();
-
-        String killMsg;
-        if (System.currentTimeMillis() - gd.lastDamageTime < 60000) {
-            PlayerUtil.play(gd.lastDamage, Sound.ORB_PICKUP);
-            killMsg = ChatUtil.getKillMessage(this, cause, gd.lastDamage);
-
-            if (gd.lastDamage.getState() == PlayerState.ALIVE) {
-                Inventory inv = gd.lastDamage.getPlayer().getInventory();
-                for (Entry<Material, Integer> mat : Shop.getWallet(getPlayer()).entrySet())
-                    inv.addItem(new ItemStack(mat.getKey(), mat.getValue()));
-            }
-
-        } else killMsg = ChatUtil.getKillMessage(this, cause, null);
-        PlayerUtil.send(gd.game.getPlayerStream(true), killMsg);
-
-        gd.lastDamage = null;
-        gd.lastDamageTime = 0;
-
-        if (gd.team.hasBed())
-            setState(PlayerState.RESPAWNING);
-        else {
-            setState(PlayerState.DEAD);
-            if (gd.team.playersAlive() == 0)
-                gd.game.onTeamElim(gd.team);
-        }
+        tpMainLobby();
     }
 
     public void onDisconnect() {
-        if (gd.state == PlayerState.ALIVE)
-            onDeath(DamageCause.CUSTOM);
-        setState(PlayerState.DISCONNECTED);
-        Stream<PlayerData> players;
-        if (gd.game == null)
-            players = GameManager.instance.getLobbyPlayers();
-        else
-            players = gd.game.getPlayerStream(true);
-        PlayerUtil.send(players, ChatUtil.format(getFormattedName(), " disconnected"));
+        if (isInGame()) gd.onDisconnent();
+        GameManager.instance.broadcastLobby(ChatUtil.format(getName(), " left"));
     }
 
-    public void onJoin() {
-        if (rejoin()) return;
+    public void onJoin(Player player) {
+        this.player = player;
+        GameManager.instance.broadcastLobby(ChatUtil.format(getName(), " joined"));
 
-        PlayerUtil.send(GameManager.instance.getLobbyPlayers(), ChatUtil.format(getName(), " joined"));
+        if (isInGame() && gd.tryRejoin()) return;
+        tpMainLobby();
     }
 
-    private void setState(PlayerState state) {
-        if (gd.game == null) return;
-        switch (state) {
-            case ALIVE:
-                spawn();
-                break;
-            case DISCONNECTED:
-                break;
-            case RESPAWNING:
-                new BukkitRunnable(){
-                    int i = 5;
-                    @Override
-                    public void run() {
-                        if (gd.game == null) {
-                            cancel();
-                            return;
-                        }
-                        sendTitle(new Title(ChatColor.RED + "YOU DIED",
-                            ChatColor.YELLOW + "Respawning in " +
-                            ChatColor.RED + i-- +
-                            ChatColor.YELLOW + " seconds",
-                            30));
-                        if (i <= 0) cancel();
-                    }
-                }.runTaskTimer(BedWarsPlugin.getInstance(), 0, 20);
-                new BukkitRunnable(){
-                    @Override
-                    public void run() {
-                        sendTitle(new Title(ChatColor.GREEN + "RESPAWNED", 0, 20, 20));
-                        setState(PlayerState.ALIVE);
-                    }
-                }.runTaskLater(BedWarsPlugin.getInstance(), 100);
-            case DEAD:
-                sendTitle(new Title(ChatColor.RED + "YOU DIED", 0, 20, 20));
-            case SPECTATING:
-                spectateMode();
-                break;
-        }
-        gd.state = state;
-    }
-
-    private void spectateMode() {
-        Player player = getPlayer();
-        if (player == null) return;
-        resetPlayer(player);
-
-        player.setGameMode(GameMode.SPECTATOR);
-        Location loc = gd.game.getLobby().clone().add(0, -4, 0);
-        loc.setPitch(90);
-        player.teleport(loc);
-    }
-
-    private void lobby() {
-        Player player = getPlayer();
-        if (player == null) return;
-        resetPlayer(player);
-        player.teleport(gd.game.getLobby());
-    }
-
-    private void spawn() {
-        Player player = getPlayer();
-        if (player == null) return;
-        resetPlayer(player);
-        player.teleport(gd.team.getSpawn());
-        player.getInventory().setContents(gd.inventory.buildInventory());
-        player.getEquipment().setArmorContents(gd.inventory.buildArmor());
-    }
-
-    private void sendTitle(Title title) {
-        PlayerUtil.send(this, title);
-    }
-
-    private static void resetPlayer(Player player) {
+    public static void resetPlayer(Player player) {
         // Gamemode
         player.setGameMode(GameMode.SURVIVAL);
         player.setHealth(player.getMaxHealth());
         player.setFoodLevel(20);
-        
+
         // Potion effects
         player.getActivePotionEffects()
             .forEach(e -> player.removePotionEffect(e.getType()));
@@ -271,16 +126,182 @@ public class PlayerData {
     }
 
     public class GamePlayer {
-        private Game game;
+        public final PlayerData player;
+        public final Game game;
         private boolean spectator;
         private Team team;
         private PlayerState state;
-        private PlayerData lastDamage;
+        private GamePlayer lastDamage;
         private long lastDamageTime;
         private PlayerInventory inventory;
 
-        private GamePlayer(Game game) {
+        private GamePlayer(PlayerData player, Game game) {
+            this.player = player;
             this.game = game;
+        }
+
+        public String getFormattedName() {
+            return team == null
+                ? ChatColor.GRAY + getName()
+                : team.getColor().getChatColor() + getName();
+        }
+
+        public Team getTeam() {
+            return team;
+        }
+
+        public void setTeam(Team team) {
+            spectator = false;
+            this.team = team;
+        }
+
+        public boolean isSpectator() {
+            return spectator;
+        }
+
+        public void setSpectator() {
+            spectator = true;
+            team = null;
+        }
+
+        public PlayerState getState() {
+            return state;
+        }
+
+        public void leaveGame() {
+            PlayerUtil.clearScoreboard(player);
+            game.leavePlayer(id);
+            gd = null;
+            tpMainLobby();
+        }
+
+        public boolean tryRejoin() {
+            if (game.getState() != GameState.RUNNING) {
+                leaveGame();
+                return false;
+            }
+
+            onRejoin();
+            return true;
+        }
+
+        private void onRejoin() {
+            PlayerUtil.send(player, game.getScoreboard());
+            if (isSpectator())
+                spectateMode(PlayerState.SPECTATING);
+            else if (gd.team.hasBed()) {
+                respawnAfter(5);
+                game.broadcast(ChatUtil.format(getFormattedName(), " rejoined"));
+            }
+            else spectateMode(PlayerState.DEAD);
+        }
+
+        public void onStart() {
+            PlayerUtil.send(player, game.getScoreboard());
+            if (isSpectator()) {
+                spectateMode(PlayerState.SPECTATING);
+                return;
+            }
+            inventory = new PlayerInventory(team.getColor());
+            spawn();
+        }
+
+        private void onDamage(GamePlayer damager) {
+            lastDamage = damager;
+            lastDamageTime = System.currentTimeMillis();
+        }
+    
+        private void onDeath(DamageCause cause) {
+            if (isSpectator()) {
+                state = PlayerState.SPECTATING;
+                return;
+            }
+
+            inventory.downgradeTools();
+
+            GamePlayer damager = getLastDamage();
+            String killMsg;
+            if (damager != null) {
+                PlayerUtil.play(damager.player, Sound.ORB_PICKUP);
+                killMsg = ChatUtil.getKillMessage(this, cause, damager);
+
+                if (damager.getState() == PlayerState.ALIVE) {
+                    Inventory inv = damager.player.getPlayer().getInventory();
+                    for (Entry<Material, Integer> mat : Shop.getWallet(player.getPlayer()).entrySet())
+                        inv.addItem(new ItemStack(mat.getKey(), mat.getValue()));
+                }
+
+            } else killMsg = ChatUtil.getKillMessage(this, cause, null);
+            game.broadcast(killMsg);
+
+            lastDamage = null;
+
+            if (team.hasBed()) {
+                respawnAfter(5);
+                return;
+            }
+
+            spectateMode(PlayerState.DEAD);
+            PlayerUtil.send(player, new Title(ChatColor.RED + "YOU DIED", 0, 20, 20));
+            if (team.playersAlive() == 0)
+                game.onTeamElim(team);
+        }
+
+        public GamePlayer getLastDamage() {
+            if (System.currentTimeMillis() - lastDamageTime > 20000) return null;
+            return lastDamage;
+        }
+
+        private void onDisconnent() {
+            if (gd.state == PlayerState.ALIVE)
+                onDeath(DamageCause.CUSTOM);
+            state = PlayerState.DISCONNECTED;
+            game.broadcast(ChatUtil.format(getFormattedName(), " disconnected"));
+        }
+
+        private void spectateMode(PlayerState state) {
+            this.state = state;
+            PlayerData.resetPlayer(player.player);
+            player.player.setGameMode(GameMode.SPECTATOR);
+            Location loc = game.getLobby().clone().add(0, -6, 0);
+            loc.setPitch(90);
+            player.player.teleport(loc);
+        }
+    
+        private void toLobby() {
+            PlayerData.resetPlayer(player.player);
+            player.player.teleport(game.getLobby());
+        }
+    
+        private void spawn() {
+            state = PlayerState.ALIVE;
+            PlayerData.resetPlayer(player.player);
+            player.player.teleport(team.getSpawn());
+            player.player.getInventory().setContents(inventory.buildInventory());
+            player.player.getEquipment().setArmorContents(inventory.buildArmor());
+        }
+    
+        private void respawnAfter(int afterSeconds) {
+            spectateMode(PlayerState.RESPAWNING);
+            new BukkitRunnable(){
+                int i = afterSeconds;
+                @Override
+                public void run() {
+                    if (game.getState() != GameState.RUNNING || state != PlayerState.RESPAWNING) {
+                        cancel();
+                    } else if (i > 0) {
+                        PlayerUtil.send(player, new Title(ChatColor.RED + "YOU DIED",
+                            ChatColor.YELLOW + "Respawning in " +
+                            ChatColor.RED + i-- +
+                            ChatColor.YELLOW + " seconds",
+                            30));
+                    } else {
+                        cancel();
+                        PlayerUtil.send(player, new Title(ChatColor.GREEN + "RESPAWNED", 0, 20, 20));
+                        spawn();
+                    }
+                }
+            }.runTaskTimer(BedWarsPlugin.getInstance(), 0, 20);
         }
     }
 

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 
 public class StopGameCommand extends AdminCommand {
     public StopGameCommand(BedWarsPlugin plugin) {
@@ -29,7 +29,7 @@ public class StopGameCommand extends AdminCommand {
     public boolean execute(Player player, List<String> args) throws CommandException {
         Game game = findGame(args.get(0));
 
-        if (game.getState() == State.STOPPED)
+        if (game.getState() == GameState.STOPPED)
             throw new CommandException("Game already stopped");
 
         game.stop();

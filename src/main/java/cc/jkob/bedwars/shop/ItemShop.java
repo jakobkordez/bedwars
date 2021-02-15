@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 
@@ -12,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -21,12 +19,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import cc.jkob.bedwars.game.GameManager;
-import cc.jkob.bedwars.game.PlayerData;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.util.BlockUtil;
 import cc.jkob.bedwars.util.LangUtil;
-import cc.jkob.bedwars.util.PlayerUtil;
 
 public class ItemShop extends Shop implements ConfigurationSerializable {
     private static final int ROWS = 6;
@@ -40,8 +36,8 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
     }
 
     @Override
-    public void open(Player player) {
-        open(player, 1);
+    public void open(GamePlayer player) {
+        open(player.player.getPlayer(), 1);
     }
 
     public void open(Player player, int tab) {
@@ -110,54 +106,21 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
         return stack;
     }
 
-    private void buy(PlayerData player, ShopItem item) {
-        Inventory inv = player.getPlayer().getInventory();
-
-        ItemStack price = item.getPrice();
-
-        if (!inv.contains(price.getType(), price.getAmount())) {
-            player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
-            return;
-        }
-
-        Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
-        int sum = price.getAmount();
-        for (Entry<Integer, ? extends ItemStack> stack : cMap.entrySet())
-            if (sum <= 0) break;
-            else {
-                int old = stack.getValue().getAmount();
-                int sub = Integer.min(sum, old);
-                if (old > sub)
-                    stack.getValue().setAmount(old - sub);
-                else
-                    inv.clear(stack.getKey());
-                sum -= sub;
-            }
-
-        if (!item.canBuy(player)) {
-            player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
-            return;
-        }
-
-        item.give(player);
-        player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + item.getName());
-        PlayerUtil.play(player, Sound.NOTE_PLING, 1f, 1.5f);
-    }
-
     @Override
-    public void click(Player player, String id, InventoryAction action) {
+    public void click(GamePlayer player, String id, InventoryAction action) {
         if (action != InventoryAction.PICKUP_ALL) return; 
         
         String[] ids = id.split(";", 2);
         TileType tType = TileType.values()[Integer.parseInt(ids[0])];
+        int sid = Integer.parseInt(ids[1]);
 
         switch (tType) {
             case CATEGORY:
-                open(player.getPlayer(), Integer.parseInt(ids[1]));
+                open(player.player.getPlayer(), sid);
                 break;
             case BUY:
-                PlayerData playerData = GameManager.instance.getPlayer(player);
-                buy(playerData, items.get(Integer.parseInt(ids[1])));
+                ShopItem item = items.get(sid);
+                if (item != null) item.tryBuy(player);
                 break;
         }
     }

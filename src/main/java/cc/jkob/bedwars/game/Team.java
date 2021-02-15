@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.game.PlayerData.PlayerState;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.util.BlockUtil;
@@ -94,19 +95,20 @@ public class Team {
         bedHead.getBlock().setType(Material.AIR);
         bedAlive = false;
 
-        PlayerUtil.play(getPlayerStream(), Sound.WITHER_DEATH);
-        PlayerUtil.send(getPlayerStream(), new Title(
+        PlayerUtil.play(getPlayersD(), Sound.WITHER_DEATH);
+        PlayerUtil.send(getPlayersD(), new Title(
             "" + ChatColor.RED + ChatColor.BOLD + "Bed Destroyed",
             "You will no longer respawn", 0, 40, 20));
     }
 
-    public boolean destroyBed(PlayerData player) {
+    public boolean destroyBed(GamePlayer player) {
         if (player.getTeam() == this) return false;
 
         destroyBed();
-        Stream<PlayerData> other = game.getPlayerStream(true).filter(p -> p.getTeam() != this);
+        Stream<PlayerData> other = game.getPlayerStream().filter(p -> p.getTeam() != this).map(p -> p.player);
         PlayerUtil.play(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
-        PlayerUtil.send(game.getPlayerStream(true), ChatUtil.format(getFormattedName() + " Bed", " was destroyed by ", player.getFormattedName()));
+        game.broadcast(ChatUtil.format(getFormattedName() + " Bed", " was destroyed by ", player.getFormattedName()));
+        if (playersAlive() == 0) game.onTeamElim(this);
         return true;
     }
 
@@ -115,17 +117,21 @@ public class Team {
     }
 
     public int playersAlive() {
-        return (int) getPlayerStream()
+        return (int) getPlayers()
             .filter(p -> p.getState() == PlayerState.ALIVE || p.getState() == PlayerState.RESPAWNING)
             .count();
     }
 
     public int getPlayerCount() {
-        return (int) getPlayerStream().count();
+        return (int) getPlayers().count();
     }
 
-    public Stream<PlayerData> getPlayerStream() {
+    public Stream<GamePlayer> getPlayers() {
         return game.getPlayers().values().parallelStream()
             .filter(p -> p.getTeam() == this);
+    }
+
+    private Stream<PlayerData> getPlayersD() {
+        return getPlayers().map(p -> p.player);
     }
 }

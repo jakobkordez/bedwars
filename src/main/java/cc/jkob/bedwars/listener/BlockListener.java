@@ -3,8 +3,9 @@ package cc.jkob.bedwars.listener;
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
 import cc.jkob.bedwars.game.GameManager;
+import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Team;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,20 +27,19 @@ public final class BlockListener extends BaseListener {
     public void onBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
 
-        Game game = GameManager.instance.getGameByWorld(block.getWorld());
-        if (game == null) return;
-
-        if (game.getState() == State.STOPPED) return;
+        PlayerData player = GameManager.instance.getPlayer(event.getPlayer());
+        if (!player.isInGame()) return;
 
         event.setCancelled(true);
 
-        if (game.getState() != State.RUNNING) return;
+        Game game = player.getGamePlayer().game;
+        if (game.getState() != GameState.RUNNING) return;
 
         if (block.getState().getType() == Material.BED_BLOCK) {
             Team team = game.getTeamByBed(block.getLocation());
             if (team == null) return;
 
-            if (!team.destroyBed(game.getPlayer(event.getPlayer())))
+            if (!team.destroyBed(player.getGamePlayer()))
                 event.getPlayer().sendMessage(ChatColor.RED + "You cannot break your own bed");
             return;
         }
@@ -57,9 +57,9 @@ public final class BlockListener extends BaseListener {
         Game game = GameManager.instance.getGameByWorld(block.getWorld());
         if (game == null) return;
 
-        if (game.getState() == State.STOPPED) return;
+        if (game.getState() == GameState.STOPPED) return;
 
-        if (game.getState() != State.RUNNING) {
+        if (game.getState() != GameState.RUNNING) {
             event.setCancelled(true);
             return;
         }

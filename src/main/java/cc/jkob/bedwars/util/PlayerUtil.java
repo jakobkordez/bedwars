@@ -19,14 +19,6 @@ public class PlayerUtil {
         sendMessage(playerD.getPlayer(), msg);
     }
 
-    public static void sendF(Stream<PlayerData> players, String ...msgs) {
-        players.forEach(p -> sendMessage(p.getPlayer(), ChatUtil.format(msgs)));
-    }
-
-    public static void sendF(PlayerData playerD, String ...msgs) {
-        sendMessage(playerD.getPlayer(), ChatUtil.format(msgs));
-    }
-
     private static void sendMessage(Player player, String msg) {
         if (player == null) return;
         player.sendMessage(msg);

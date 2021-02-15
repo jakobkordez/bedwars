@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game;
-import cc.jkob.bedwars.game.Game.State;
+import cc.jkob.bedwars.game.Game.GameState;
 
 public class StartGameCommand extends AdminCommand {
     public StartGameCommand(BedWarsPlugin plugin) {
@@ -29,7 +29,7 @@ public class StartGameCommand extends AdminCommand {
     public boolean execute(Player player, List<String> args) throws CommandException {
         Game game = findGame(args.get(0));
 
-        if (game.getState() != State.WAITING)
+        if (game.getState() != GameState.WAITING)
             throw new CommandException("Game must be initialized");
 
         game.start();
