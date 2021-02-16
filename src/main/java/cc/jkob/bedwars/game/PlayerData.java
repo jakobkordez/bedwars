@@ -60,6 +60,8 @@ public class PlayerData {
                 gd.setSpectator();
                 gd.spectateMode(PlayerState.SPECTATING);
                 break;
+            case STOPPED:
+                game.init();
             case WAITING:
                 gd = new GamePlayer(this, game);
                 game.joinPlayer(gd);

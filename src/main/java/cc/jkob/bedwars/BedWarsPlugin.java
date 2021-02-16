@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BedWarsPlugin extends JavaPlugin {
     private static BedWarsPlugin instance;
+
     public static BedWarsPlugin getInstance() {
         return instance;
     }

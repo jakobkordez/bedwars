@@ -252,8 +252,6 @@ public class Game {
 
     public void joinPlayer(GamePlayer player) {
         switch (state) {
-            case STOPPED:
-                init();
             case WAITING:
             case RUNNING:
                 players.put(player.player.id, player);

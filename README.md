@@ -6,7 +6,7 @@ Supports Spigot 1.8
 
 ## TODO
 
-- [ ] Server lobby
+- [x] Server lobby
 - [ ] Game lobby
     - [ ] Pick team
     - [ ] Start game
@@ -17,7 +17,7 @@ Supports Spigot 1.8
   - [ ] "*YOU*" beside team name
 - [ ] Generators
   - [ ] Splitting
-- [ ] Leave game commnad
+- [x] Leave game commnad
 - [ ] Player state
   - [x] Disconnecting / Reconnecting
 - [ ] Game state
@@ -27,6 +27,7 @@ Supports Spigot 1.8
   - [ ] Fix shopkeepers despawning
   - [ ] Variable prices
   - [ ] Item shop
+    - [ ] Tools
     - [x] Water (remove bucket)
     - [x] Potions
       - [ ] Fix invisibility
