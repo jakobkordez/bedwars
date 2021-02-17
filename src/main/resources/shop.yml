@@ -140,9 +140,10 @@ item_shop:
       type: GOLD_INGOT
       amount: 5
 
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.ArmorItem
     id: 12
     name: Chainmail Armor
+    armor: CHAINMAIL
     item: 
       ==: org.bukkit.inventory.ItemStack
       type: CHAINMAIL_BOOTS
@@ -150,9 +151,10 @@ item_shop:
       ==: org.bukkit.inventory.ItemStack
       type: IRON_INGOT
       amount: 40
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.ArmorItem
     id: 13
     name: Iron Armor
+    armor: IRON
     item: 
       ==: org.bukkit.inventory.ItemStack
       type: IRON_BOOTS
@@ -160,9 +162,10 @@ item_shop:
       ==: org.bukkit.inventory.ItemStack
       type: GOLD_INGOT
       amount: 12
-  - ==: cc.jkob.bedwars.shop.ShopItem
+  - ==: cc.jkob.bedwars.shop.ArmorItem
     id: 14
     name: Diamond Armor
+    armor: DIAMOND
     item: 
       ==: org.bukkit.inventory.ItemStack
       type: DIAMOND_BOOTS

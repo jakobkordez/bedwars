@@ -5,6 +5,7 @@ import cc.jkob.bedwars.listener.InteractPacketListener;
 import cc.jkob.bedwars.listener.InvisibilityListener;
 import cc.jkob.bedwars.listener.PlayerListener;
 import cc.jkob.bedwars.listener.WorldListener;
+import cc.jkob.bedwars.shop.ArmorItem;
 import cc.jkob.bedwars.shop.DyableShopItem;
 import cc.jkob.bedwars.shop.ItemShop;
 import cc.jkob.bedwars.shop.PotionItem;
@@ -34,6 +35,7 @@ public class BedWarsPlugin extends JavaPlugin {
         ConfigurationSerialization.registerClass(PotionItem.class);
         ConfigurationSerialization.registerClass(ShopCategory.class);
         ConfigurationSerialization.registerClass(ItemShop.class);
+        ConfigurationSerialization.registerClass(ArmorItem.class);
 
         new BlockListener(this);
         new PlayerListener(this);

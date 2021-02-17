@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game.GameState;
+import cc.jkob.bedwars.game.PlayerInventory.Armor;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.util.ChatUtil;
@@ -168,6 +169,15 @@ public class PlayerData {
 
         public PlayerState getState() {
             return state;
+        }
+
+        public Armor getArmor() {
+            return inventory.getArmor();
+        }
+
+        public void setArmor(Armor armor) {
+            inventory.setArmor(armor);
+            player.player.getEquipment().setArmorContents(inventory.buildArmor());
         }
 
         public void leaveGame() {

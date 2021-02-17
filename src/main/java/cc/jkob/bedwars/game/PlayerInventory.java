@@ -22,6 +22,14 @@ public class PlayerInventory {
         this.color = color;
     }
 
+    public Armor getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Armor armor) {
+        this.armor = armor;
+    }
+
     public ItemStack[] buildInventory() {
         List<ItemStack> inv = new ArrayList<>();
 
@@ -133,7 +141,7 @@ public class PlayerInventory {
         }
     }
 
-    private static enum Armor {
+    public static enum Armor {
         LEATHER(Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS),
         CHAINMAIL(Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS),
         IRON(Material.IRON_LEGGINGS, Material.IRON_BOOTS),

@@ -59,6 +59,11 @@ public class ShopItem implements ConfigurationSerializable {
             return;
         }
 
+        if (!canBuy(player)) {
+            player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
+            return;
+        }
+
         Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
         int sum = price.getAmount();
         for (Entry<Integer, ? extends ItemStack> stack : cMap.entrySet())
@@ -72,11 +77,6 @@ public class ShopItem implements ConfigurationSerializable {
                     inv.clear(stack.getKey());
                 sum -= sub;
             }
-
-        if (!canBuy(player)) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
-            return;
-        }
 
         give(player);
         player.player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + name);
