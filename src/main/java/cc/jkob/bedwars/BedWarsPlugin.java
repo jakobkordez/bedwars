@@ -2,6 +2,7 @@ package cc.jkob.bedwars;
 
 import cc.jkob.bedwars.listener.BlockListener;
 import cc.jkob.bedwars.listener.InteractPacketListener;
+import cc.jkob.bedwars.listener.InvisibilityListener;
 import cc.jkob.bedwars.listener.PlayerListener;
 import cc.jkob.bedwars.listener.WorldListener;
 import cc.jkob.bedwars.shop.DyableShopItem;
@@ -39,6 +40,7 @@ public class BedWarsPlugin extends JavaPlugin {
         new WorldListener(this);
 
         ProtocolLibrary.getProtocolManager().addPacketListener(new InteractPacketListener(this));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new InvisibilityListener(this));
 
         Shop.getItemShop();
 

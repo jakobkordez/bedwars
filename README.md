@@ -30,7 +30,7 @@ Supports Spigot 1.8
     - [ ] Tools
     - [x] Water (remove bucket)
     - [x] Potions
-      - [ ] Fix invisibility
+      - [x] Fix invisibility
     - [x] Bows
     - [x] Knockback stick
     - [x] TNT (Ignite on place)

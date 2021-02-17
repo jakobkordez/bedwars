@@ -2,6 +2,7 @@ package cc.jkob.bedwars.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -103,6 +104,10 @@ public class PacketUtil {
     }
 
     // Helpers //
+    public static void updateEntity(Entity entity) {
+        getManager().updateEntity(entity, entity.getWorld().getEntitiesByClass(Player.class).stream().collect(Collectors.toList()));
+    }
+
     private static WrappedDataWatcher getDefaulWatcher(World world, EntityType type) {
         Entity entity = world.spawnEntity(new Location(world, 0, 256, 0), type);
         WrappedDataWatcher dataWatcher = WrappedDataWatcher.getEntityWatcher(entity).deepClone();

@@ -277,7 +277,7 @@ item_shop:
           duration: 900
           amplifier: 4
           ambient: true
-          has-particles: true
+          has-particles: false
     price:
       ==: org.bukkit.inventory.ItemStack
       type: EMERALD
@@ -298,7 +298,7 @@ item_shop:
           duration: 900
           amplifier: 1
           ambient: true
-          has-particles: true
+          has-particles: false
     price:
       ==: org.bukkit.inventory.ItemStack
       type: EMERALD
@@ -319,7 +319,7 @@ item_shop:
           duration: 600
           amplifier: 1
           ambient: true
-          has-particles: true
+          has-particles: false
     price:
       ==: org.bukkit.inventory.ItemStack
       type: EMERALD

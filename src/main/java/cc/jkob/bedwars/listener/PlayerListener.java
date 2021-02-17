@@ -9,6 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -21,10 +22,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.event.PlayerUseEntityEvent;
@@ -35,6 +39,7 @@ import cc.jkob.bedwars.game.Game.GameState;
 import cc.jkob.bedwars.gui.GuiType;
 import cc.jkob.bedwars.shop.Shopkeeper;
 import cc.jkob.bedwars.util.LangUtil;
+import cc.jkob.bedwars.util.PacketUtil;
 
 public class PlayerListener extends BaseListener {
 
@@ -142,6 +147,33 @@ public class PlayerListener extends BaseListener {
         if (shopkeeper == null) return;
 
         shopkeeper.getShopType().getShop().open(player);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onItemConsume(PlayerItemConsumeEvent event) {
+        if (event.getItem().getType() != Material.POTION) return;
+
+        Player player = event.getPlayer();
+        PlayerData playerD = GameManager.instance.getPlayer(player);
+
+        if (!playerD.isInGame()) return;
+
+        Game game = playerD.getGamePlayer().game;
+        if (game.getState() != GameState.RUNNING) return;
+
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                player.getInventory().remove(Material.GLASS_BOTTLE);
+            }
+        }.runTaskLater(plugin, 10);
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                PacketUtil.updateEntity(player);
+                if (!player.hasPotionEffect(PotionEffectType.INVISIBILITY)) cancel();
+            }
+        }.runTaskTimer(plugin, 10, 20);
     }
 
     @EventHandler
