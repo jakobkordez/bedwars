@@ -99,16 +99,19 @@ public class Team {
         PlayerUtil.send(getPlayersD(), new Title(
             "" + ChatColor.RED + ChatColor.BOLD + "Bed Destroyed",
             "You will no longer respawn", 0, 40, 20));
+        if (getPlayerCount() != 0 && playersAlive() == 0)
+            game.onTeamElim(this);
     }
 
     public boolean destroyBed(GamePlayer player) {
         if (player.getTeam() == this) return false;
 
         destroyBed();
-        Stream<PlayerData> other = game.getPlayerStream().filter(p -> p.getTeam() != this).map(p -> p.player);
+        Stream<PlayerData> other = game.getPlayerStream()
+            .filter(p -> p.getTeam() != this)
+            .map(p -> p.player);
         PlayerUtil.play(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
         game.broadcast(ChatUtil.format(getFormattedName() + " Bed", " was destroyed by ", player.getFormattedName()));
-        if (playersAlive() == 0) game.onTeamElim(this);
         return true;
     }
 
