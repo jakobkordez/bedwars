@@ -1,5 +1,7 @@
 package cc.jkob.bedwars;
 
+import cc.jkob.bedwars.game.Tool;
+import cc.jkob.bedwars.game.Tool.ToolStage;
 import cc.jkob.bedwars.listener.BlockListener;
 import cc.jkob.bedwars.listener.InteractPacketListener;
 import cc.jkob.bedwars.listener.InvisibilityListener;
@@ -12,6 +14,7 @@ import cc.jkob.bedwars.shop.PotionItem;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.shop.ShopCategory;
 import cc.jkob.bedwars.shop.ShopItem;
+import cc.jkob.bedwars.shop.ToolItem;
 import cc.jkob.bedwars.util.BedWarsCommandExecutor;
 
 import com.comphenix.protocol.ProtocolLibrary;
@@ -36,6 +39,9 @@ public class BedWarsPlugin extends JavaPlugin {
         ConfigurationSerialization.registerClass(ShopCategory.class);
         ConfigurationSerialization.registerClass(ItemShop.class);
         ConfigurationSerialization.registerClass(ArmorItem.class);
+        ConfigurationSerialization.registerClass(ToolItem.class);
+        ConfigurationSerialization.registerClass(Tool.class);
+        ConfigurationSerialization.registerClass(ToolStage.class);
 
         new BlockListener(this);
         new PlayerListener(this);

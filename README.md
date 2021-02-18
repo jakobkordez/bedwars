@@ -23,11 +23,13 @@ Supports Spigot 1.8
 - [ ] Game state
   - [x] Team elimination
   - [x] Auto-end
+  - [ ] Clear chests
 - [ ] Shop
   - [ ] Fix shopkeepers despawning
   - [ ] Variable prices
   - [ ] Item shop
-    - [ ] Tools
+    - [x] Tools
+    - [x] Armor
     - [x] Water (remove bucket)
     - [x] Potions
       - [x] Fix invisibility
@@ -38,4 +40,10 @@ Supports Spigot 1.8
     - [x] Fireball (Shoot)
     - [ ] Quick buy
   - [ ] Upgrades shop
+    - [ ] Sharpness
+    - [ ] Protection
+    - [ ] Heal Pool
+    - [ ] Forge
+    - [ ] Maniac Miner
+    - [ ] Traps
   - [ ] Tracker shop

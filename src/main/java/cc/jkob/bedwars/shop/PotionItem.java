@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
-import cc.jkob.bedwars.gui.GuiType;
+import cc.jkob.bedwars.game.PlayerData.GamePlayer;
 import cc.jkob.bedwars.util.LangUtil;
 
 public class PotionItem extends ShopItem {
@@ -25,8 +25,8 @@ public class PotionItem extends ShopItem {
     }
 
     @Override
-    public ItemStack getShopSlot(GuiType guiType, Map<Material, Integer> wallet) {
-        ItemStack stack = super.getShopSlot(guiType, wallet);
+    public ItemStack getShopSlot(int cid, GamePlayer player, Map<Material, Integer> wallet) {
+        ItemStack stack = super.getShopSlot(cid, player, wallet);
 
         PotionMeta meta = (PotionMeta) stack.getItemMeta();
         PotionEffect eff = meta.getCustomEffects().get(0);
@@ -51,5 +51,4 @@ public class PotionItem extends ShopItem {
             (ItemStack) args.get("item"),
             (ItemStack) args.get("price"));
     }
-
 }

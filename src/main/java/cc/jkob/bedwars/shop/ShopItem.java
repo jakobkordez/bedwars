@@ -16,8 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import cc.jkob.bedwars.game.PlayerData.GamePlayer;
-import cc.jkob.bedwars.gui.GuiType;
-import cc.jkob.bedwars.shop.ItemShop.TileType;
 import cc.jkob.bedwars.shop.Shop.Currency;
 import cc.jkob.bedwars.util.PlayerUtil;
 
@@ -52,32 +50,17 @@ public class ShopItem implements ConfigurationSerializable {
     }
 
     public void tryBuy(GamePlayer player) {
-        Inventory inv = player.player.getPlayer().getInventory();
-
-        if (!inv.contains(price.getType(), price.getAmount())) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
-            return;
-        }
-
         if (!canBuy(player)) {
             player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
             return;
         }
 
-        Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
-        int sum = price.getAmount();
-        for (Entry<Integer, ? extends ItemStack> stack : cMap.entrySet())
-            if (sum <= 0) break;
-            else {
-                int old = stack.getValue().getAmount();
-                int sub = Integer.min(sum, old);
-                if (old > sub)
-                    stack.getValue().setAmount(old - sub);
-                else
-                    inv.clear(stack.getKey());
-                sum -= sub;
-            }
+        if (!hasBalance(player, price)) {
+            player.player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
+            return;
+        }
 
+        takeBalance(player, price);
         give(player);
         player.player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + name);
         PlayerUtil.play(player.player, Sound.NOTE_PLING, 1f, 1.5f);
@@ -92,14 +75,14 @@ public class ShopItem implements ConfigurationSerializable {
         player.player.getPlayer().getInventory().addItem(item);
     }
 
-    public ItemStack getShopSlot(GuiType guiType, Map<Material, Integer> wallet) {
+    public ItemStack getShopSlot(int cid, GamePlayer player, Map<Material, Integer> wallet) {
         ItemStack stack = new ItemStack(item);
 
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName((wallet.getOrDefault(price.getType(), 0) < price.getAmount() ? ChatColor.RED : ChatColor.GREEN) + getName());
         meta.setLore(Lists.newArrayList(
             ChatColor.GRAY + "Cost: " + Shop.formatCost(price),
-            ItemShop.getTileData(TileType.BUY, id)
+            ItemShop.getTileData(cid, id)
         ));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -108,6 +91,28 @@ public class ShopItem implements ConfigurationSerializable {
 
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    protected static boolean hasBalance(GamePlayer player, ItemStack price) {
+        return player.player.getPlayer().getInventory().contains(price.getType(), price.getAmount());
+    }
+
+    protected static void takeBalance(GamePlayer player, ItemStack price) {
+        Inventory inv = player.player.getPlayer().getInventory();
+        
+        Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
+        int sum = price.getAmount();
+        for (Entry<Integer, ? extends ItemStack> stack : cMap.entrySet())
+            if (sum <= 0) break;
+            else {
+                int old = stack.getValue().getAmount();
+                int sub = Integer.min(sum, old);
+                if (old > sub)
+                    stack.getValue().setAmount(old - sub);
+                else
+                    inv.clear(stack.getKey());
+                sum -= sub;
+            }
     }
 
     @Override
@@ -127,5 +132,4 @@ public class ShopItem implements ConfigurationSerializable {
             (ItemStack) args.get("item"),
             (ItemStack) args.get("price"));
     }
-
 }

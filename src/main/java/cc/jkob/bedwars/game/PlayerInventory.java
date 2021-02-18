@@ -1,20 +1,20 @@
 package cc.jkob.bedwars.game;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import cc.jkob.bedwars.game.Tool.ToolStage;
 import cc.jkob.bedwars.util.BlockUtil;
 
 public class PlayerInventory {
-    private Pickaxe pickaxe = Pickaxe.NONE;
-    private Axe axe = Axe.NONE;
-    private Shears shears = Shears.NONE;
+    private Map<Tool, StagedTool> tools = new HashMap<>();
     private Armor armor = Armor.LEATHER;
     protected TeamColor color;
 
@@ -30,13 +30,29 @@ public class PlayerInventory {
         this.armor = armor;
     }
 
+    public StagedTool getTool(Tool tool) {
+        return tools.get(tool);
+    }
+
+    public void downgradeTools() {
+        for (StagedTool t : tools.values())
+            t.downgrade();
+    }
+
+    public void upgradeTool(Tool tool) {
+        if (!tools.containsKey(tool)) {
+            tools.put(tool, new StagedTool(tool));
+        } else
+            tools.get(tool).upgrade();
+    }
+
     public ItemStack[] buildInventory() {
         List<ItemStack> inv = new ArrayList<>();
 
         inv.add(buildUnbreakable(Material.WOOD_SWORD));
-        if (shears.item != null) inv.add(shears.item);
-        if (pickaxe.item != null) inv.add(pickaxe.item);
-        if (axe.item != null) inv.add(axe.item);
+        for (StagedTool tool : tools.values())
+            if (tool.getItem() != null)
+                inv.add(tool.getItem());
 
         return inv.toArray(new ItemStack[0]);
     }
@@ -53,91 +69,32 @@ public class PlayerInventory {
         return item;
     }
 
-    public void downgradeTools() {
-        int p = pickaxe.ordinal() - 1;
-        if (p > 0) pickaxe = Pickaxe.values()[p];
+    public static class StagedTool {
+        public final Tool tool;
+        private int stage = 0;
 
-        int a = axe.ordinal() - 1;
-        if (a > 0) axe = Axe.values()[a];
-    }
-
-    public void upgradePickaxe() {
-        int p = pickaxe.ordinal() + 1;
-        if (p < Pickaxe.values().length)
-            pickaxe = Pickaxe.values()[p];
-    }
-
-    public void upgradeAxe() {
-        int a = axe.ordinal() + 1;
-        if (a < Axe.values().length)
-            axe = Axe.values()[a];
-    }
-
-    public void upgradeShears() {
-        int s = shears.ordinal() + 1;
-        if (s < Shears.values().length)
-            shears = Shears.values()[s];
-    }
-
-    public boolean upgradeArmor(Armor armor) {
-        if (armor.ordinal() <= this.armor.ordinal())
-            return false;
-        this.armor = armor;
-        return true;
-    }
-
-    private static enum Pickaxe {
-        NONE,
-        LEVEL_1(Material.WOOD_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 1)),
-        LEVEL_2(Material.IRON_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 2)),
-        LEVEL_3(Material.GOLD_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 3)),
-        LEVEL_4(Material.DIAMOND_PICKAXE, new EnchPair(Enchantment.DIG_SPEED, 4));
-
-        public final ItemStack item;
-
-        private Pickaxe() {
-            item = null;
+        public StagedTool(Tool tool) {
+            this.tool = tool;
         }
 
-        private Pickaxe(Material material, EnchPair ...enchants) {
-            item = buildUnbreakable(material);
-            for (EnchPair p : enchants)
-                item.addEnchantment(p.type, p.level);
-        }
-    }
-
-    private static enum Axe {
-        NONE,
-        LEVEL_1(Material.WOOD_AXE, new EnchPair(Enchantment.DIG_SPEED, 1)),
-        LEVEL_2(Material.STONE_AXE, new EnchPair(Enchantment.DIG_SPEED, 1)),
-        LEVEL_3(Material.IRON_AXE, new EnchPair(Enchantment.DIG_SPEED, 2)),
-        LEVEL_4(Material.DIAMOND_AXE, new EnchPair(Enchantment.DIG_SPEED, 3));
-
-        public final ItemStack item;
-
-        private Axe() {
-            item = null;
+        public void upgrade() {
+            stage = tool.upgrade(stage);
         }
 
-        private Axe(Material material, EnchPair ...enchants) {
-            item = buildUnbreakable(material);
-            for (EnchPair p : enchants)
-                item.addEnchantment(p.type, p.level);
-        }
-    }
-
-    private static enum Shears {
-        NONE,
-        LEVEL_1(Material.SHEARS);
-
-        public final ItemStack item;
-
-        private Shears() {
-            item = null;
+        public void downgrade() {
+            stage = tool.downgrade(stage);
         }
 
-        private Shears(Material material) {
-            item = buildUnbreakable(material);
+        public ItemStack getItem() {
+            return tool.get(stage);
+        }
+
+        public ToolStage getNextStage() {
+            return tool.getStage(tool.upgrade(stage));
+        }
+
+        public boolean canUpgrade() {
+            return stage < tool.upgrade(stage);
         }
     }
 
@@ -171,16 +128,6 @@ public class PlayerInventory {
                 ap.setItemMeta(meta);
             }
             return armor;
-        }
-    }
-
-    private static class EnchPair {
-        public Enchantment type;
-        public int level;
-
-        public EnchPair(Enchantment type, int level) {
-            this.type = type;
-            this.level = level;
         }
     }
 }

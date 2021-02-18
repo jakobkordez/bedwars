@@ -37,17 +37,18 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
     @Override
     public void open(GamePlayer player) {
-        open(player.player.getPlayer(), 1);
+        open(player, 1);
     }
 
-    public void open(Player player, int tab) {
-        player.openInventory(buildInventory(player, tab));
+    public void open(GamePlayer player, int tab) {
+        Player p = player.player.getPlayer();
+        p.openInventory(buildInventory(player, tab));
     }
 
-    private Inventory buildInventory(Player player, int cIndex) {
+    private Inventory buildInventory(GamePlayer player, int cIndex) {
         ItemStack[] invStacks = new ItemStack[9 * ROWS];
 
-        Map<Material, Integer> wallet = getWallet(player);
+        Map<Material, Integer> wallet = getWallet(player.player.getPlayer());
 
         // Categories
         int i;
@@ -70,7 +71,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
             for (int itemId : categories.get(cIndex - 1).getItems()) {
                 ShopItem item = items.get(itemId);
                 if (item == null) continue;
-                invStacks[19 + i + 2 * (i / 7)] = item.getShopSlot(GUI_TYPE, wallet);
+                invStacks[19 + i + 2 * (i / 7)] = item.getShopSlot(cIndex, player, wallet);
                 ++i;
             }
         } else {
@@ -99,7 +100,7 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
 
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + name);
-        meta.setLore(Lists.newArrayList(getTileData(TileType.CATEGORY, catId)));
+        meta.setLore(Lists.newArrayList(getTileData(catId)));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         
         stack.setItemMeta(meta);
@@ -110,23 +111,28 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
     public void click(GamePlayer player, String id, InventoryAction action) {
         if (action != InventoryAction.PICKUP_ALL) return; 
         
-        String[] ids = id.split(";", 2);
+        String[] ids = id.split(";");
         TileType tType = TileType.values()[Integer.parseInt(ids[0])];
-        int sid = Integer.parseInt(ids[1]);
+        int cid = Integer.parseInt(ids[1]);
 
         switch (tType) {
             case CATEGORY:
-                open(player.player.getPlayer(), sid);
+                open(player, cid);
                 break;
             case BUY:
-                ShopItem item = items.get(sid);
+                ShopItem item = items.get(Integer.parseInt(ids[2]));
                 if (item != null) item.tryBuy(player);
+                open(player, cid);
                 break;
         }
     }
 
-    static String getTileData(TileType type, int id) {
-        return LangUtil.hideString(GUI_TYPE.ordinal() + ";" + type.ordinal() + ";" + id);
+    static String getTileData(int cid) {
+        return LangUtil.hideString(GUI_TYPE.ordinal() + ";" + TileType.CATEGORY.ordinal() + ";" + cid);
+    }
+
+    static String getTileData(int cid, int id) {
+        return LangUtil.hideString(GUI_TYPE.ordinal() + ";" + TileType.BUY.ordinal() + ";" + cid + ";" + id);
     }
 
     @Override

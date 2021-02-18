@@ -17,6 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import cc.jkob.bedwars.BedWarsPlugin;
 import cc.jkob.bedwars.game.Game.GameState;
 import cc.jkob.bedwars.game.PlayerInventory.Armor;
+import cc.jkob.bedwars.game.PlayerInventory.StagedTool;
 import cc.jkob.bedwars.gui.Title;
 import cc.jkob.bedwars.shop.Shop;
 import cc.jkob.bedwars.util.ChatUtil;
@@ -178,6 +179,19 @@ public class PlayerData {
         public void setArmor(Armor armor) {
             inventory.setArmor(armor);
             player.player.getEquipment().setArmorContents(inventory.buildArmor());
+        }
+
+        public StagedTool getTool(Tool tool) {
+            return inventory.getTool(tool);
+        }
+
+        public void upgradeTool(Tool tool) {
+            Inventory inv = player.player.getInventory();
+            StagedTool stagedTool = getTool(tool);
+            if (stagedTool != null)
+                inv.remove(stagedTool.getItem());
+            inventory.upgradeTool(tool);
+            inv.addItem(getTool(tool).getItem());
         }
 
         public void leaveGame() {
