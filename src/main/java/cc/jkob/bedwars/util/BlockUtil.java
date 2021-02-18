@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Wool;
+import org.bukkit.util.Vector;
 
 public class BlockUtil {
     public static void placeBed(Location feet, Location head) {
@@ -73,5 +74,11 @@ public class BlockUtil {
         meta.setColor(color.getFireworkColor());
         armor.setItemMeta(meta);
         return armor;
+    }
+
+    public static boolean blocks(Vector source, Vector target, Vector blocker) {
+        Vector temp = target.clone().subtract(source);
+        double dSq = temp.clone().crossProduct(source.clone().subtract(blocker)).lengthSquared() / temp.lengthSquared();
+        return dSq <= 0.25;
     }
 }

@@ -6,6 +6,10 @@ import cc.jkob.bedwars.game.GameManager;
 import cc.jkob.bedwars.game.PlayerData;
 import cc.jkob.bedwars.game.Team;
 import cc.jkob.bedwars.game.Game.GameState;
+import cc.jkob.bedwars.util.BlockUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +19,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.util.Vector;
 
 public final class BlockListener extends BaseListener {
 
@@ -69,7 +75,7 @@ public final class BlockListener extends BaseListener {
 
         if (block.getType() == Material.TNT) {
             block.setType(Material.AIR);
-            block.getWorld().spawn(block.getLocation().add(.5, .5, .5), TNTPrimed.class).setYield(3);
+            block.getWorld().spawn(block.getLocation().add(.5, .5, .5), TNTPrimed.class);
             return;
         }
 
@@ -77,11 +83,27 @@ public final class BlockListener extends BaseListener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onPrime(ExplosionPrimeEvent event) {
+        if (GameManager.instance.getGameByWorld(event.getEntity()) == null) return;
+
+        event.setFire(true);
+        event.setRadius(3);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onExplode(EntityExplodeEvent event) {
         Game game = GameManager.instance.getGameByWorld(event.getEntity());
         if (game == null) return;
 
-        event.blockList().removeIf(b -> !game.isPlacedBlock(b.getLocation()) || b.getType() == Material.STAINED_GLASS);
+        event.blockList().removeIf(b -> !game.isPlacedBlock(b.getLocation()));
+        List<Block> glass = event.blockList().parallelStream()
+            .filter(b -> b.getType() == Material.STAINED_GLASS)
+            .collect(Collectors.toList());
+        event.blockList().removeAll(glass);
+        Vector v = new Vector(.5, .5, .5);
+        event.blockList().removeIf(b ->
+            glass.parallelStream().anyMatch(g ->
+                BlockUtil.blocks(event.getLocation().toVector(), b.getLocation().toVector().add(v), g.getLocation().toVector().add(v))));
     }
 
     @EventHandler(ignoreCancelled = true)
