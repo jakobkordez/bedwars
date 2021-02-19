@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -122,6 +123,7 @@ public class PlayerInventory {
             }
             armor[2] = BlockUtil.getColoredArmor(Material.LEATHER_CHESTPLATE, color);
             armor[3] = BlockUtil.getColoredArmor(Material.LEATHER_HELMET, color);
+            armor[3].addEnchantment(Enchantment.WATER_WORKER, 1);
             for (ItemStack ap : armor) {
                 ItemMeta meta = ap.getItemMeta();
                 meta.spigot().setUnbreakable(true);

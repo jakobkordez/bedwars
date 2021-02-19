@@ -36,7 +36,7 @@ Supports Spigot 1.8
     - [x] Bows
     - [x] Knockback stick
     - [x] TNT (Ignite on place)
-      - [ ] Glass protects blocks
+      - [x] Glass protects blocks
     - [x] Fireball (Shoot)
     - [ ] Quick buy
   - [ ] Upgrades shop

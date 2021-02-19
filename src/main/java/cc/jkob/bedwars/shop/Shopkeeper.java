@@ -23,6 +23,10 @@ public class Shopkeeper {
         this.type = type;
     }
 
+    public Location getLoc() {
+        return loc;
+    }
+
     public ShopType getShopType() {
         return type;
     }

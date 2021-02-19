@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.TNTPrimed;
@@ -70,12 +71,19 @@ public final class BlockListener extends BaseListener {
             return;
         }
 
-        // TODO: Check invalid placement (spawns, gens, shops, ...)
-        // event.setCancelled(true);
+        Location blockLoc = block.getLocation().add(.5, .5, .5);
+        if (game.getGenerators().parallelStream().anyMatch(g -> g.getPos().distanceSquared(blockLoc) < 16) ||
+            game.getTeams().parallelStream().anyMatch(t -> t.getSpawn().distanceSquared(blockLoc) < 12 || t.getIronGen().getPos().distanceSquared(blockLoc) < 12) ||
+            game.getShopkeepers().parallelStream().anyMatch(s -> s.getLoc().distanceSquared(blockLoc) < 9)) {
+
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(ChatColor.RED + "You cannot place blocks here");
+            return;
+        }
 
         if (block.getType() == Material.TNT) {
             block.setType(Material.AIR);
-            block.getWorld().spawn(block.getLocation().add(.5, .5, .5), TNTPrimed.class);
+            block.getWorld().spawn(blockLoc, TNTPrimed.class);
             return;
         }
 
@@ -87,7 +95,7 @@ public final class BlockListener extends BaseListener {
         if (GameManager.instance.getGameByWorld(event.getEntity()) == null) return;
 
         event.setFire(true);
-        event.setRadius(3);
+        event.setRadius(2.5f);
     }
 
     @EventHandler(ignoreCancelled = true)

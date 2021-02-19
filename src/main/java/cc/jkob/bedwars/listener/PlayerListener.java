@@ -15,7 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -77,10 +77,24 @@ public class PlayerListener extends BaseListener {
             return;
         }
 
-        if (event.getCause() == DamageCause.VOID) {
-            event.setCancelled(true);
-            player.onDeath(DamageCause.VOID);
-            return;
+        switch (event.getCause()) {
+            case BLOCK_EXPLOSION:
+            case CONTACT:
+            case DROWNING:
+            case ENTITY_EXPLOSION:
+            case FALL:
+            case FIRE:
+            case FIRE_TICK:
+            case SUFFOCATION:
+                event.setDamage(event.getDamage(DamageModifier.BASE) / 2);
+                break;
+            case SUICIDE:
+            case VOID:
+                event.setCancelled(true);
+                player.onDeath(event.getCause());
+                return;
+            default:
+                break;
         }
 
         if (event instanceof EntityDamageByEntityEvent) {
@@ -115,9 +129,8 @@ public class PlayerListener extends BaseListener {
                 player.setItemInHand(null);
                 block.setType(Material.WATER);
                 game.getPlacedBlocks().add(block.getLocation());
+                return;
             }
-
-            return;
         }
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
@@ -126,6 +139,7 @@ public class PlayerListener extends BaseListener {
                 if (amount < 1) player.setItemInHand(null);
                 else player.getItemInHand().setAmount(amount);
 
+                event.setCancelled(true);
                 player.launchProjectile(Fireball.class);
                 return;
             }
