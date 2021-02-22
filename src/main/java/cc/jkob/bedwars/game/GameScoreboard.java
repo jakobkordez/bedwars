@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import cc.jkob.bedwars.BedWarsPlugin;
-import cc.jkob.bedwars.task.ScoreboardUpdateTask;
 
 public class GameScoreboard {
     private static final int MAX_LINES = 15;
@@ -19,7 +20,7 @@ public class GameScoreboard {
     private final Game game;
     private final Scoreboard board;
     private Objective sidebar;
-    private ScoreboardUpdateTask updateTask;
+    private BukkitTask updateTask;
 
     public GameScoreboard(Game game) {
         this.game = game;
@@ -34,8 +35,12 @@ public class GameScoreboard {
     public boolean startTask() {
         if (updateTask != null) return false;
 
-        updateTask = new ScoreboardUpdateTask(this);
-        updateTask.runTaskTimer(BedWarsPlugin.getInstance(), 0, 10);
+        updateTask = new BukkitRunnable(){
+            @Override
+            public void run() {
+                updateSidebar();
+            }
+        }.runTaskTimer(BedWarsPlugin.getInstance(), 0, 10);
         return true;
     }
 
@@ -52,8 +57,11 @@ public class GameScoreboard {
     private void setSidebar() {
         int i = MAX_LINES;
 
-        if (sidebar != null) sidebar.unregister();
-        
+        Objective ob;
+        ob = board.registerNewObjective("Health", "health");
+        ob.setDisplayName("" + Symbols.HEART);
+        ob.setDisplaySlot(DisplaySlot.BELOW_NAME);
+
         sidebar = board.registerNewObjective("Teams", "dummy");
         sidebar.setDisplayName("" + ChatColor.YELLOW + ChatColor.BOLD + "    Bed Wars    ");
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -118,7 +126,7 @@ public class GameScoreboard {
     private enum Symbols {
         CHECK("✓", ChatColor.GREEN),
         CROSS("✗", ChatColor.RED),
-        HEART("♥", ChatColor.RED);
+        HEART("❤", ChatColor.RED);
 
         private final String string;
 

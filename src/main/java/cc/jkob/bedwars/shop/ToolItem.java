@@ -57,7 +57,7 @@ public class ToolItem extends ShopItem {
     @Override
     public void tryBuy(GamePlayer player) {
         if (!canBuy(player)) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
+            player.getPD().getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
             return;
         }
 
@@ -65,14 +65,14 @@ public class ToolItem extends ShopItem {
         ItemStack price = stage.getPrice();
 
         if (!hasBalance(player, price)) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
+            player.getPD().getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
             return;
         }
 
         takeBalance(player, price);
         give(player);
-        player.player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + tool.name);
-        PlayerUtil.play(player.player, Sound.NOTE_PLING, 1f, 1.5f);
+        player.getPD().getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + tool.name);
+        PlayerUtil.play(player.getPD(), Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     @Override

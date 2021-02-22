@@ -41,14 +41,14 @@ public class ItemShop extends Shop implements ConfigurationSerializable {
     }
 
     public void open(GamePlayer player, int tab) {
-        Player p = player.player.getPlayer();
+        Player p = player.getPD().getPlayer();
         p.openInventory(buildInventory(player, tab));
     }
 
     private Inventory buildInventory(GamePlayer player, int cIndex) {
         ItemStack[] invStacks = new ItemStack[9 * ROWS];
 
-        Map<Material, Integer> wallet = getWallet(player.player.getPlayer());
+        Map<Material, Integer> wallet = getWallet(player.getPD().getPlayer());
 
         // Categories
         int i;

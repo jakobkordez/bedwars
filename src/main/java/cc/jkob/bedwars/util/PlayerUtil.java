@@ -3,7 +3,6 @@ package cc.jkob.bedwars.util;
 import java.util.stream.Stream;
 
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 
 import cc.jkob.bedwars.game.GameScoreboard;
 import cc.jkob.bedwars.game.PlayerData;
@@ -12,16 +11,11 @@ import cc.jkob.bedwars.gui.Title;
 public class PlayerUtil {
     // Messages //
     public static void send(Stream<PlayerData> players, String msg) {
-        players.forEach(p -> sendMessage(p.getPlayer(), msg));
+        players.forEach(p -> send(p, msg));
     }
 
-    public static void send(PlayerData playerD, String msg) {
-        sendMessage(playerD.getPlayer(), msg);
-    }
-
-    private static void sendMessage(Player player, String msg) {
-        if (player == null) return;
-        player.sendMessage(msg);
+    public static void send(PlayerData player, String msg) {
+        player.getPlayer().sendMessage(msg);
     }
 
     // Titles //
@@ -29,18 +23,14 @@ public class PlayerUtil {
         players.forEach(p -> send(p, title));
     }
 
-    public static void send(PlayerData playerD, Title title) {
-        resetTitle(playerD);
-        Player player = playerD.getPlayer();
-        if (player == null) return;
-        PacketUtil.sendPacket(player, title.getTitlePacket());
-        PacketUtil.sendPacket(player, title.getSubTitlePacket());
-        PacketUtil.sendPacket(player, title.getTimesPacket());
+    public static void send(PlayerData player, Title title) {
+        resetTitle(player);
+        PacketUtil.sendPacket(player.getPlayer(), title.getTitlePacket());
+        PacketUtil.sendPacket(player.getPlayer(), title.getSubTitlePacket());
+        PacketUtil.sendPacket(player.getPlayer(), title.getTimesPacket());
     }
 
-    public static void resetTitle(PlayerData playerD) {
-        Player player = playerD.getPlayer();
-        if (player == null) return;
+    public static void resetTitle(PlayerData player) {
         PacketUtil.sendPacket(player.getPlayer(), Title.getResetPacket());
     }
 
@@ -57,10 +47,8 @@ public class PlayerUtil {
         players.forEach(p -> play(p, sound, volume, pitch));
     }
 
-    public static void play(PlayerData playerD, Sound sound, float volume, float pitch) {
-        Player player = playerD.getPlayer();
-        if (player == null) return;
-        player.playSound(player.getLocation(), sound, volume, pitch);
+    public static void play(PlayerData player, Sound sound, float volume, float pitch) {
+        player.getPlayer().playSound(player.getPlayer().getLocation(), sound, volume, pitch);
     }
 
     // Scoreboard //
@@ -68,19 +56,15 @@ public class PlayerUtil {
         players.forEach(p -> send(p, scoreboard));
     }
 
-    public static void send(PlayerData playerD, GameScoreboard scoreboard) {
-        Player player = playerD.getPlayer();
-        if (player == null) return;
-        player.setScoreboard(scoreboard.getBoard());
+    public static void send(PlayerData player, GameScoreboard scoreboard) {
+        player.getPlayer().setScoreboard(scoreboard.getBoard());
     }
 
     public static void clearScoreboard(Stream<PlayerData> players) {
         players.forEach(p -> clearScoreboard(p));
     }
 
-    public static void clearScoreboard(PlayerData playerD) {
-        Player player = playerD.getPlayer();
-        if (player == null) return;
-        player.setScoreboard(GameScoreboard.EMPTY);
+    public static void clearScoreboard(PlayerData player) {
+        player.getPlayer().setScoreboard(GameScoreboard.EMPTY);
     }
 }

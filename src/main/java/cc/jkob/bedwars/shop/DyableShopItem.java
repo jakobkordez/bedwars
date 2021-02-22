@@ -28,7 +28,7 @@ public class DyableShopItem extends ShopItem {
         Team team = player.getTeam();
         ItemStack it = BlockUtil.getColoredStack(material, team.getColor().getDyeColor(), item.getAmount());
         it.setItemMeta(item.getItemMeta());
-        player.player.getPlayer().getInventory().addItem(it);
+        player.getPD().getPlayer().getInventory().addItem(it);
     }
 
     @Override

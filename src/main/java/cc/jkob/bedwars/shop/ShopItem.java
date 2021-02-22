@@ -51,19 +51,19 @@ public class ShopItem implements ConfigurationSerializable {
 
     public void tryBuy(GamePlayer player) {
         if (!canBuy(player)) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
+            player.getPD().getPlayer().sendMessage(ChatColor.RED + "You cannot buy that");
             return;
         }
 
         if (!hasBalance(player, price)) {
-            player.player.getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
+            player.getPD().getPlayer().sendMessage(ChatColor.RED + "You do not have enough " + Currency.valueOf(price.getType()).toString(true));
             return;
         }
 
         takeBalance(player, price);
         give(player);
-        player.player.getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + name);
-        PlayerUtil.play(player.player, Sound.NOTE_PLING, 1f, 1.5f);
+        player.getPD().getPlayer().sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.GOLD + name);
+        PlayerUtil.play(player.getPD(), Sound.NOTE_PLING, 1f, 1.5f);
     }
 
     public void give(GamePlayer player) {
@@ -72,7 +72,7 @@ public class ShopItem implements ConfigurationSerializable {
         meta.setDisplayName(ChatColor.WHITE + name);
         item.setItemMeta(meta);
 
-        player.player.getPlayer().getInventory().addItem(item);
+        player.getPD().getPlayer().getInventory().addItem(item);
     }
 
     public ItemStack getShopSlot(int cid, GamePlayer player, Map<Material, Integer> wallet) {
@@ -94,11 +94,11 @@ public class ShopItem implements ConfigurationSerializable {
     }
 
     protected static boolean hasBalance(GamePlayer player, ItemStack price) {
-        return player.player.getPlayer().getInventory().contains(price.getType(), price.getAmount());
+        return player.getPD().getPlayer().getInventory().contains(price.getType(), price.getAmount());
     }
 
     protected static void takeBalance(GamePlayer player, ItemStack price) {
-        Inventory inv = player.player.getPlayer().getInventory();
+        Inventory inv = player.getPD().getPlayer().getInventory();
         
         Map<Integer, ? extends ItemStack> cMap = inv.all(price.getType());
         int sum = price.getAmount();

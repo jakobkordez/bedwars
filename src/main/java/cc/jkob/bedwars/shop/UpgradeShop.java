@@ -11,7 +11,7 @@ public class UpgradeShop extends Shop {
     @Override
     protected void open(GamePlayer player) {
         // TODO: Implement
-        player.player.getPlayer().openInventory(Bukkit.createInventory(null, 9 * ROWS, ShopType.UPGRADE.getName()));
+        player.getPD().getPlayer().openInventory(Bukkit.createInventory(null, 9 * ROWS, ShopType.UPGRADE.getName()));
     }
 
     @Override

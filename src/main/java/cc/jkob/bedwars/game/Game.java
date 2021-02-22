@@ -254,7 +254,7 @@ public class Game {
         switch (state) {
             case WAITING:
             case RUNNING:
-                players.put(player.player.id, player);
+                players.put(player.getPD().id, player);
                 break;
             default:
                 break;
@@ -271,7 +271,7 @@ public class Game {
     }
 
     private Stream<PlayerData> getPlayersD() {
-        return getPlayerStream().map(p -> p.player);
+        return getPlayerStream().map(p -> p.getPD());
     }
 
 

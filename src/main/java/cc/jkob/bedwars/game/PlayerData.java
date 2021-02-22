@@ -57,7 +57,7 @@ public class PlayerData {
         if (isInGame()) gd.leaveGame();
         switch (game.getState()) {
             case RUNNING:
-                gd = new GamePlayer(this, game);
+                gd = new GamePlayer(game);
                 game.joinPlayer(gd);
                 gd.setSpectator();
                 gd.spectateMode(PlayerState.SPECTATING);
@@ -65,7 +65,7 @@ public class PlayerData {
             case STOPPED:
                 game.init();
             case WAITING:
-                gd = new GamePlayer(this, game);
+                gd = new GamePlayer(game);
                 game.joinPlayer(gd);
                 gd.toLobby();
                 break;
@@ -130,7 +130,6 @@ public class PlayerData {
     }
 
     public class GamePlayer {
-        public final PlayerData player;
         public final Game game;
         private boolean spectator;
         private Team team;
@@ -139,9 +138,12 @@ public class PlayerData {
         private long lastDamageTime;
         private PlayerInventory inventory;
 
-        private GamePlayer(PlayerData player, Game game) {
-            this.player = player;
+        private GamePlayer(Game game) {
             this.game = game;
+        }
+
+        public PlayerData getPD() {
+            return PlayerData.this;
         }
 
         public String getFormattedName() {
@@ -178,7 +180,7 @@ public class PlayerData {
 
         public void setArmor(Armor armor) {
             inventory.setArmor(armor);
-            player.player.getEquipment().setArmorContents(inventory.buildArmor());
+            PlayerData.this.getPlayer().getEquipment().setArmorContents(inventory.buildArmor());
         }
 
         public StagedTool getTool(Tool tool) {
@@ -186,7 +188,7 @@ public class PlayerData {
         }
 
         public void upgradeTool(Tool tool) {
-            Inventory inv = player.player.getInventory();
+            Inventory inv = player.getInventory();
             StagedTool stagedTool = getTool(tool);
             if (stagedTool != null)
                 inv.remove(stagedTool.getItem());
@@ -195,7 +197,7 @@ public class PlayerData {
         }
 
         public void leaveGame() {
-            PlayerUtil.clearScoreboard(player);
+            PlayerUtil.clearScoreboard(PlayerData.this);
             game.leavePlayer(id);
             gd = null;
             tpMainLobby();
@@ -212,7 +214,7 @@ public class PlayerData {
         }
 
         private void onRejoin() {
-            PlayerUtil.send(player, game.getScoreboard());
+            preparePlayer();
             if (isSpectator())
                 spectateMode(PlayerState.SPECTATING);
             else if (gd.team.hasBed()) {
@@ -223,7 +225,7 @@ public class PlayerData {
         }
 
         public void onStart() {
-            PlayerUtil.send(player, game.getScoreboard());
+            preparePlayer();
             if (isSpectator()) {
                 spectateMode(PlayerState.SPECTATING);
                 return;
@@ -248,11 +250,11 @@ public class PlayerData {
             GamePlayer damager = getLastDamage();
             String killMsg;
             if (damager != null) {
-                PlayerUtil.play(damager.player, Sound.ORB_PICKUP);
+                PlayerUtil.play(damager.getPD(), Sound.ORB_PICKUP);
                 killMsg = ChatUtil.getKillMessage(this, cause, damager);
 
                 if (damager.getState() == PlayerState.ALIVE) {
-                    Inventory inv = damager.player.getPlayer().getInventory();
+                    Inventory inv = damager.getPD().getPlayer().getInventory();
                     for (Entry<Material, Integer> mat : Shop.getWallet(player.getPlayer()).entrySet())
                         inv.addItem(new ItemStack(mat.getKey(), mat.getValue()));
                 }
@@ -268,7 +270,7 @@ public class PlayerData {
             }
 
             spectateMode(PlayerState.DEAD);
-            PlayerUtil.send(player, new Title(ChatColor.RED + "YOU DIED", 0, 20, 20));
+            PlayerUtil.send(PlayerData.this, new Title(ChatColor.RED + "YOU DIED", 0, 20, 20));
             if (team.playersAlive() == 0)
                 game.onTeamElim(team);
         }
@@ -285,26 +287,39 @@ public class PlayerData {
             game.broadcast(ChatUtil.format(getFormattedName(), " disconnected"));
         }
 
+        private void preparePlayer() {
+            // Scoreboard
+            PlayerUtil.send(PlayerData.this, game.getScoreboard());
+            player.setHealth(player.getHealth());
+
+            // Set name
+            String longName = team.getColor().getPrefix() + " " + getFormattedName() + ChatColor.RESET;
+            player.setDisplayName(longName);
+            player.setPlayerListName(longName);
+
+            // TODO: Shopkeepers
+        }
+
         private void spectateMode(PlayerState state) {
             this.state = state;
-            PlayerData.resetPlayer(player.player);
-            player.player.setGameMode(GameMode.SPECTATOR);
+            PlayerData.resetPlayer(player);
+            player.setGameMode(GameMode.SPECTATOR);
             Location loc = game.getLobby().clone().add(0, -6, 0);
             loc.setPitch(90);
-            player.player.teleport(loc);
+            player.teleport(loc);
         }
     
         private void toLobby() {
-            PlayerData.resetPlayer(player.player);
-            player.player.teleport(game.getLobby());
+            PlayerData.resetPlayer(player);
+            player.teleport(game.getLobby());
         }
     
         private void spawn() {
             state = PlayerState.ALIVE;
-            PlayerData.resetPlayer(player.player);
-            player.player.teleport(team.getSpawn());
-            player.player.getInventory().setContents(inventory.buildInventory());
-            player.player.getEquipment().setArmorContents(inventory.buildArmor());
+            PlayerData.resetPlayer(player);
+            player.teleport(team.getSpawn());
+            player.getInventory().setContents(inventory.buildInventory());
+            player.getEquipment().setArmorContents(inventory.buildArmor());
         }
     
         private void respawnAfter(int afterSeconds) {
@@ -316,14 +331,14 @@ public class PlayerData {
                     if (game.getState() != GameState.RUNNING || state != PlayerState.RESPAWNING) {
                         cancel();
                     } else if (i > 0) {
-                        PlayerUtil.send(player, new Title(ChatColor.RED + "YOU DIED",
+                        PlayerUtil.send(PlayerData.this, new Title(ChatColor.RED + "YOU DIED",
                             ChatColor.YELLOW + "Respawning in " +
                             ChatColor.RED + i-- +
                             ChatColor.YELLOW + " seconds",
                             30));
                     } else {
                         cancel();
-                        PlayerUtil.send(player, new Title(ChatColor.GREEN + "RESPAWNED", 0, 20, 20));
+                        PlayerUtil.send(PlayerData.this, new Title(ChatColor.GREEN + "RESPAWNED", 0, 20, 20));
                         spawn();
                     }
                 }

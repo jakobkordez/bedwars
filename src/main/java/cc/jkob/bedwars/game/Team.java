@@ -109,7 +109,7 @@ public class Team {
         destroyBed();
         Stream<PlayerData> other = game.getPlayerStream()
             .filter(p -> p.getTeam() != this)
-            .map(p -> p.player);
+            .map(p -> p.getPD());
         PlayerUtil.play(other, Sound.ENDERDRAGON_GROWL, .5f, 1f);
         game.broadcast(ChatUtil.format(getFormattedName() + " Bed", " was destroyed by ", player.getFormattedName()));
         return true;
@@ -135,6 +135,6 @@ public class Team {
     }
 
     private Stream<PlayerData> getPlayersD() {
-        return getPlayers().map(p -> p.player);
+        return getPlayers().map(p -> p.getPD());
     }
 }
