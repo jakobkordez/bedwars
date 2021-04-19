@@ -61,7 +61,7 @@ public class PlayerUtil {
     }
 
     public static void clearScoreboard(Stream<PlayerData> players) {
-        players.forEach(p -> clearScoreboard(p));
+        players.forEach(PlayerUtil::clearScoreboard);
     }
 
     public static void clearScoreboard(PlayerData player) {

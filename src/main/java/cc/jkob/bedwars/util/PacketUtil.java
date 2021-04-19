@@ -1,6 +1,7 @@
 package cc.jkob.bedwars.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -105,7 +106,7 @@ public class PacketUtil {
 
     // Helpers //
     public static void updateEntity(Entity entity) {
-        getManager().updateEntity(entity, entity.getWorld().getEntitiesByClass(Player.class).stream().collect(Collectors.toList()));
+        getManager().updateEntity(entity, new ArrayList<>(entity.getWorld().getEntitiesByClass(Player.class)));
     }
 
     private static WrappedDataWatcher getDefaulWatcher(World world, EntityType type) {

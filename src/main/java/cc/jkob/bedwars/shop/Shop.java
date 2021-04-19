@@ -59,13 +59,13 @@ public abstract class Shop implements InventoryGui {
         Map<Material, Integer> wallet = new HashMap<>();
 
         ItemStack[] inv = player.getInventory().getContents();
-        for (int i = 0; i < inv.length; ++i) {
-            if (inv[i] == null) continue;
+        for (ItemStack itemStack : inv) {
+            if (itemStack == null) continue;
 
-            Currency currency = Currency.valueOf(inv[i].getType());
+            Currency currency = Currency.valueOf(itemStack.getType());
             if (currency == null) continue;
-            
-            wallet.put(inv[i].getType(), wallet.getOrDefault(inv[i].getType(), 0) + inv[i].getAmount());
+
+            wallet.put(itemStack.getType(), wallet.getOrDefault(itemStack.getType(), 0) + itemStack.getAmount());
         }
 
         return wallet;
@@ -109,9 +109,9 @@ public abstract class Shop implements InventoryGui {
 
         public static Currency valueOf(Material material) {
             Currency[] values = values();
-            for (int i = 0; i < values.length; ++i)
-                if (values[i].material == material)
-                    return values[i];
+            for (Currency value : values)
+                if (value.material == material)
+                    return value;
             
             return null;
         }

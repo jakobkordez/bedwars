@@ -97,7 +97,7 @@ public class GameScoreboard {
     }
     
     public Score updateScore(Score score, String entry) {
-        if (score.getEntry() == entry) return score;
+        if (score.getEntry().equals(entry)) return score;
 
         int sc = score.getScore();
         board.resetScores(score.getEntry());
